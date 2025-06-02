@@ -149,3 +149,384 @@ WARNING 2025-06-02 13:42:36,406 oracle_11g 4336 17556 等待事件表格解析为空
 INFO 2025-06-02 13:42:36,413 oracle_11g 4336 17556 检测到Oracle 11g AWR格式
 WARNING 2025-06-02 13:42:36,453 oracle_11g 4336 17556 未找到等待事件表格
 WARNING 2025-06-02 13:42:36,457 oracle_11g 4336 17556 未找到SQL统计表格
+INFO 2025-06-02 14:09:47,332 oracle_19c 14824 17728 找到 3 个AWR锚点，尝试作为Oracle 19c解析
+INFO 2025-06-02 14:09:47,344 oracle_19c 14824 17728 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:09:47,345 oracle_19c 14824 17728 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:09:47,345 oracle_19c 14824 17728 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:09:47,345 oracle_19c 14824 17728 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:09:47,345 oracle_19c 14824 17728 检测到Oracle 19c AWR格式
+WARNING 2025-06-02 14:09:47,362 oracle_19c 14824 17728 未找到数据库信息表格
+WARNING 2025-06-02 14:09:47,363 oracle_19c 14824 17728 未找到快照信息表格
+WARNING 2025-06-02 14:09:47,364 oracle_19c 14824 17728 未找到负载概要表格
+WARNING 2025-06-02 14:09:47,364 oracle_19c 14824 17728 未找到等待事件表格
+WARNING 2025-06-02 14:09:47,365 oracle_19c 14824 17728 未找到SQL统计数据
+WARNING 2025-06-02 14:09:47,365 oracle_19c 14824 17728 未找到实例活动统计表格
+INFO 2025-06-02 14:09:47,386 oracle_19c 14824 17728 检测到Oracle 19c AWR格式
+WARNING 2025-06-02 14:09:47,399 oracle_19c 14824 17728 未找到数据库信息表格
+WARNING 2025-06-02 14:09:47,455 oracle_19c 14824 17728 未找到负载概要表格
+WARNING 2025-06-02 14:09:47,551 oracle_19c 14824 17728 等待事件表格无数据行
+INFO 2025-06-02 14:09:47,558 oracle_19c 14824 17728 检测到Oracle 19c AWR格式
+WARNING 2025-06-02 14:09:47,619 oracle_19c 14824 17728 未找到负载概要表格
+WARNING 2025-06-02 14:09:47,621 oracle_19c 14824 17728 未找到等待事件表格
+WARNING 2025-06-02 14:09:47,623 oracle_19c 14824 17728 未找到SQL统计数据
+WARNING 2025-06-02 14:09:47,625 oracle_19c 14824 17728 未找到实例活动统计表格
+INFO 2025-06-02 14:15:45,497 factory 16824 18764 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:16:19,867 factory 1652 6896 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:16:20,049 factory 1652 6896 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:16:20,050 factory 1652 6896 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:16:20,059 factory 1652 6896 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:16:43,071 factory 4360 1404 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:16:43,080 factory 4360 1404 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:16:43,081 factory 4360 1404 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:16:43,090 factory 4360 1404 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:16:55,505 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,506 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,506 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,507 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,507 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:16:55,510 factory 10772 18940 注册解析器: 19c -> MockParser
+WARNING 2025-06-02 14:16:55,512 utils 10772 18940 无法识别Oracle版本
+WARNING 2025-06-02 14:16:55,512 factory 10772 18940 无法确定Oracle版本，尝试自动检测解析器
+INFO 2025-06-02 14:16:55,513 factory 10772 18940 自动检测选择解析器: MockParser
+INFO 2025-06-02 14:16:55,775 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,775 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,776 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,776 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,777 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:16:55,777 factory 10772 18940 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:16:55,781 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,781 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,782 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,782 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,782 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:16:55,782 factory 10772 18940 必须指定version或html_content参数
+INFO 2025-06-02 14:16:55,789 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,789 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,789 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,789 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,790 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:16:55,790 factory 10772 18940 未找到Oracle 12c解析器
+INFO 2025-06-02 14:16:55,795 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,795 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,795 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,796 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,796 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:16:55,825 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,826 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,826 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,826 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,827 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:16:55,856 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,856 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,856 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,856 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,857 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:16:55,861 factory 10772 18940 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:16:55,861 factory 10772 18940 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:16:55,861 factory 10772 18940 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:16:55,862 factory 10772 18940 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:16:55,862 factory 10772 18940 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:16:55,863 factory 10772 18940 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:18:26,205 factory 14824 8 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:18:26,206 factory 14824 8 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:18:26,207 factory 14824 8 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:18:26,207 factory 14824 8 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:18:26,207 factory 14824 8 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:18:26,208 factory 14824 8 注册解析器: 11g -> CannotParseParser
+INFO 2025-06-02 14:18:26,208 factory 14824 8 注册解析器: 19c -> CanParseParser
+INFO 2025-06-02 14:18:26,208 factory 14824 8 自动检测选择解析器: CanParseParser
+INFO 2025-06-02 14:18:40,287 factory 19216 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:18:40,288 factory 19216 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:18:40,289 factory 19216 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:18:40,289 factory 19216 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:18:40,289 factory 19216 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:18:40,290 factory 19216 12084 注册解析器: 11g -> CannotParseParser
+WARNING 2025-06-02 14:18:40,291 factory 19216 12084 无法找到合适的解析器处理该AWR内容
+INFO 2025-06-02 14:18:53,296 factory 19092 12204 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:18:53,297 factory 19092 12204 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:18:53,299 factory 19092 12204 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:18:53,299 factory 19092 12204 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:18:53,300 factory 19092 12204 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:18:53,302 factory 19092 12204 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:19:06,175 factory 8320 14844 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:06,176 factory 8320 14844 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:06,176 factory 8320 14844 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:06,176 factory 8320 14844 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:06,177 factory 8320 14844 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:06,179 oracle_11g 8320 14844 检测到Oracle 11g AWR格式
+INFO 2025-06-02 14:19:06,180 factory 8320 14844 自动检测选择解析器: Oracle11gParser
+INFO 2025-06-02 14:19:06,186 factory 8320 14844 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:06,186 factory 8320 14844 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:06,186 factory 8320 14844 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:06,186 factory 8320 14844 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:06,187 factory 8320 14844 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:06,187 oracle_19c 8320 14844 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:19:06,187 factory 8320 14844 自动检测选择解析器: Oracle19cParser
+INFO 2025-06-02 14:19:06,191 factory 8320 14844 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:06,191 factory 8320 14844 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:06,192 factory 8320 14844 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:06,192 factory 8320 14844 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:06,193 factory 8320 14844 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:06,197 factory 8320 14844 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:06,197 factory 8320 14844 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:06,197 factory 8320 14844 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:06,197 factory 8320 14844 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:06,198 factory 8320 14844 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,261 factory 3620 1652 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:19:20,272 factory 3620 1652 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:19:20,272 factory 3620 1652 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:19:20,280 factory 3620 1652 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:19:20,285 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,286 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,286 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,287 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,287 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,289 factory 3620 1652 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:19:20,294 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,294 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,294 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,295 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,295 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,295 factory 3620 1652 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:19:20,301 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,301 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,301 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,301 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,302 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:19:20,302 factory 3620 1652 必须指定version或html_content参数
+INFO 2025-06-02 14:19:20,307 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,307 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,308 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,308 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,308 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:19:20,309 factory 3620 1652 未找到Oracle 12c解析器
+INFO 2025-06-02 14:19:20,313 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,314 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,314 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,314 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,314 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,315 factory 3620 1652 注册解析器: 11g -> CannotParseParser
+INFO 2025-06-02 14:19:20,315 factory 3620 1652 注册解析器: 19c -> CanParseParser
+INFO 2025-06-02 14:19:20,315 factory 3620 1652 自动检测选择解析器: CanParseParser
+INFO 2025-06-02 14:19:20,320 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,321 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,321 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,321 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,321 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,322 factory 3620 1652 注册解析器: 11g -> CannotParseParser
+WARNING 2025-06-02 14:19:20,324 factory 3620 1652 无法找到合适的解析器处理该AWR内容
+INFO 2025-06-02 14:19:20,328 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,329 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,329 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,329 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,329 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,335 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,336 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,336 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,336 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,337 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,337 factory 3620 1652 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:19:20,518 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,518 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,518 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,518 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,519 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,519 factory 3620 1652 初始化AWR解析器工厂
+INFO 2025-06-02 14:19:20,543 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,543 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,544 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,544 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,544 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,546 oracle_11g 3620 1652 检测到Oracle 11g AWR格式
+INFO 2025-06-02 14:19:20,546 factory 3620 1652 自动检测选择解析器: Oracle11gParser
+INFO 2025-06-02 14:19:20,551 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,552 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,552 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,552 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,552 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,553 oracle_19c 3620 1652 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:19:20,553 factory 3620 1652 自动检测选择解析器: Oracle19cParser
+INFO 2025-06-02 14:19:20,557 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,558 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,558 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,558 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,558 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:19:20,562 factory 3620 1652 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:19:20,563 factory 3620 1652 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:19:20,563 factory 3620 1652 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:19:20,563 factory 3620 1652 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:19:20,564 factory 3620 1652 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:22:14,755 factory 16800 14680 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:22:14,756 factory 16800 14680 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:22:14,757 factory 16800 14680 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:22:14,757 factory 16800 14680 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:22:14,757 factory 16800 14680 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:22:14,757 factory 16800 14680 初始化AWR解析器工厂
+INFO 2025-06-02 14:36:16,575 factory 9028 12084 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:36:16,585 factory 9028 12084 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:36:16,586 factory 9028 12084 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:36:16,593 factory 9028 12084 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:36:16,600 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,601 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,601 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,601 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,602 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,605 factory 9028 12084 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:36:16,611 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,611 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,611 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,612 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,612 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,613 factory 9028 12084 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:36:16,618 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,618 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,619 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,619 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,619 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:36:16,620 factory 9028 12084 必须指定version或html_content参数
+INFO 2025-06-02 14:36:16,624 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,625 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,625 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,625 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,626 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:36:16,626 factory 9028 12084 未找到Oracle 12c解析器
+INFO 2025-06-02 14:36:16,631 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,632 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,632 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,632 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,633 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,634 factory 9028 12084 注册解析器: 11g -> CannotParseParser
+INFO 2025-06-02 14:36:16,634 factory 9028 12084 注册解析器: 19c -> CanParseParser
+INFO 2025-06-02 14:36:16,634 factory 9028 12084 自动检测选择解析器: CanParseParser
+INFO 2025-06-02 14:36:16,639 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,640 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,640 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,640 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,641 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,642 factory 9028 12084 注册解析器: 11g -> CannotParseParser
+WARNING 2025-06-02 14:36:16,644 factory 9028 12084 无法找到合适的解析器处理该AWR内容
+INFO 2025-06-02 14:36:16,651 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,651 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,651 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,651 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,652 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,657 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,657 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,657 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,657 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,658 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,658 factory 9028 12084 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:36:16,963 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,963 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,963 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,963 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,964 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,964 factory 9028 12084 初始化AWR解析器工厂
+INFO 2025-06-02 14:36:16,978 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,978 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,978 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,978 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,979 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,980 oracle_11g 9028 12084 检测到Oracle 11g AWR格式
+INFO 2025-06-02 14:36:16,981 factory 9028 12084 自动检测选择解析器: Oracle11gParser
+INFO 2025-06-02 14:36:16,985 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,986 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,986 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,986 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,987 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,987 oracle_19c 9028 12084 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:36:16,987 factory 9028 12084 自动检测选择解析器: Oracle19cParser
+INFO 2025-06-02 14:36:16,992 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,992 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,992 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,992 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,993 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:36:16,998 factory 9028 12084 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:36:16,998 factory 9028 12084 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:36:16,998 factory 9028 12084 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:36:16,998 factory 9028 12084 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:36:16,999 factory 9028 12084 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,311 factory 5108 7544 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:38:09,321 factory 5108 7544 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:38:09,322 factory 5108 7544 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:38:09,329 factory 5108 7544 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:38:09,334 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,335 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,335 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,335 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,336 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,338 factory 5108 7544 注册解析器: 19c -> MockParser
+INFO 2025-06-02 14:38:09,344 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,344 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,344 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,344 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,345 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,345 factory 5108 7544 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:38:09,351 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,351 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,351 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,352 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,352 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:38:09,352 factory 5108 7544 必须指定version或html_content参数
+INFO 2025-06-02 14:38:09,358 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,358 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,358 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,358 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,359 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+ERROR 2025-06-02 14:38:09,359 factory 5108 7544 未找到Oracle 12c解析器
+INFO 2025-06-02 14:38:09,364 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,365 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,365 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,365 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,366 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,368 factory 5108 7544 注册解析器: 11g -> CannotParseParser
+INFO 2025-06-02 14:38:09,368 factory 5108 7544 注册解析器: 19c -> CanParseParser
+INFO 2025-06-02 14:38:09,368 factory 5108 7544 自动检测选择解析器: CanParseParser
+INFO 2025-06-02 14:38:09,373 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,373 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,373 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,373 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,374 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,374 factory 5108 7544 注册解析器: 11g -> CannotParseParser
+WARNING 2025-06-02 14:38:09,376 factory 5108 7544 无法找到合适的解析器处理该AWR内容
+INFO 2025-06-02 14:38:09,381 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,381 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,382 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,382 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,383 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,390 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,390 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,391 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,391 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,392 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,393 factory 5108 7544 注册解析器: 11g -> MockParser
+INFO 2025-06-02 14:38:09,408 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,408 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,409 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,409 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,410 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,410 factory 5108 7544 初始化AWR解析器工厂
+INFO 2025-06-02 14:38:09,430 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,431 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,431 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,431 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,432 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,434 oracle_11g 5108 7544 检测到Oracle 11g AWR格式
+INFO 2025-06-02 14:38:09,434 factory 5108 7544 自动检测选择解析器: Oracle11gParser
+INFO 2025-06-02 14:38:09,440 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,440 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,440 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,440 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,441 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,441 oracle_19c 5108 7544 检测到Oracle 19c AWR格式
+INFO 2025-06-02 14:38:09,441 factory 5108 7544 自动检测选择解析器: Oracle19cParser
+INFO 2025-06-02 14:38:09,446 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,446 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,446 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,447 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,448 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 14:38:09,454 factory 5108 7544 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 14:38:09,454 factory 5108 7544 Oracle 19c解析器注册成功
+INFO 2025-06-02 14:38:09,455 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 14:38:09,455 factory 5108 7544 Oracle 11g解析器注册成功
+WARNING 2025-06-02 14:38:09,455 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
