@@ -45,3 +45,107 @@ WARNING 2025-06-02 11:38:09,127 oracle_19c 11396 4540 未找到负载概要表格
 WARNING 2025-06-02 11:38:09,129 oracle_19c 11396 4540 未找到等待事件表格
 WARNING 2025-06-02 11:38:09,131 oracle_19c 11396 4540 未找到SQL统计数据
 WARNING 2025-06-02 11:38:09,133 oracle_19c 11396 4540 未找到实例活动统计表格
+INFO 2025-06-02 12:07:20,862 oracle_11g 928 15580 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 12:07:20,870 oracle_11g 928 15580 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 12:07:21,175 oracle_11g 928 15580 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:07:21,176 oracle_11g 928 15580 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:07:21,176 oracle_11g 928 15580 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:07:21,191 oracle_11g 928 15580 未找到数据库信息表格
+INFO 2025-06-02 12:07:21,357 oracle_11g 928 15580 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:10:41,009 oracle_11g 16364 15756 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 12:10:41,018 oracle_11g 16364 15756 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 12:10:41,024 oracle_11g 16364 15756 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:10:41,025 oracle_11g 16364 15756 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:10:41,025 oracle_11g 16364 15756 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:10:41,045 oracle_11g 16364 15756 未找到数据库信息表格
+WARNING 2025-06-02 12:10:41,080 oracle_11g 16364 15756 无法解析启动时间: invalid-time
+INFO 2025-06-02 12:10:41,089 oracle_11g 16364 15756 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:10:41,096 oracle_11g 16364 15756 未找到数据库信息表格
+WARNING 2025-06-02 12:10:41,108 oracle_11g 16364 15756 未找到数据库信息表格
+WARNING 2025-06-02 12:10:41,571 oracle_11g 16364 15756 未找到Load Profile表格
+INFO 2025-06-02 12:18:03,037 oracle_11g 4780 6088 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 12:18:03,043 oracle_11g 4780 6088 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 12:18:03,047 oracle_11g 4780 6088 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:18:03,047 oracle_11g 4780 6088 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:18:03,047 oracle_11g 4780 6088 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:18:03,064 oracle_11g 4780 6088 未找到数据库信息表格
+WARNING 2025-06-02 12:18:03,088 oracle_11g 4780 6088 无法解析启动时间: invalid-time
+INFO 2025-06-02 12:18:03,092 oracle_11g 4780 6088 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:18:03,097 oracle_11g 4780 6088 未找到数据库信息表格
+WARNING 2025-06-02 12:18:03,107 oracle_11g 4780 6088 未找到数据库信息表格
+WARNING 2025-06-02 12:18:03,401 oracle_11g 4780 6088 未找到Load Profile表格
+INFO 2025-06-02 12:24:19,308 oracle_11g 4320 7272 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 12:24:19,313 oracle_11g 4320 7272 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 12:24:19,318 oracle_11g 4320 7272 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:24:19,318 oracle_11g 4320 7272 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:24:19,319 oracle_11g 4320 7272 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:24:19,335 oracle_11g 4320 7272 未找到数据库信息表格
+WARNING 2025-06-02 12:24:19,360 oracle_11g 4320 7272 无法解析启动时间: invalid-time
+INFO 2025-06-02 12:24:19,364 oracle_11g 4320 7272 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:24:19,371 oracle_11g 4320 7272 未找到数据库信息表格
+WARNING 2025-06-02 12:24:19,381 oracle_11g 4320 7272 未找到数据库信息表格
+WARNING 2025-06-02 12:24:19,618 oracle_11g 4320 7272 未找到Load Profile表格
+WARNING 2025-06-02 12:24:19,627 oracle_11g 4320 7272 未找到快照信息表格
+WARNING 2025-06-02 12:24:19,776 oracle_11g 4320 7272 等待事件表格解析为空
+INFO 2025-06-02 12:24:19,781 oracle_11g 4320 7272 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:24:19,806 oracle_11g 4320 7272 未找到快照信息表格
+WARNING 2025-06-02 12:24:19,865 oracle_11g 4320 7272 未找到等待事件表格
+WARNING 2025-06-02 12:24:19,868 oracle_11g 4320 7272 未找到SQL统计表格
+INFO 2025-06-02 12:26:02,438 oracle_11g 16204 18104 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 12:26:02,444 oracle_11g 16204 18104 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 12:26:02,448 oracle_11g 16204 18104 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:26:02,448 oracle_11g 16204 18104 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:26:02,449 oracle_11g 16204 18104 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:26:02,463 oracle_11g 16204 18104 未找到数据库信息表格
+WARNING 2025-06-02 12:26:02,486 oracle_11g 16204 18104 无法解析启动时间: invalid-time
+INFO 2025-06-02 12:26:02,490 oracle_11g 16204 18104 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:26:02,495 oracle_11g 16204 18104 未找到数据库信息表格
+WARNING 2025-06-02 12:26:02,548 oracle_11g 16204 18104 未找到Load Profile表格
+WARNING 2025-06-02 12:26:02,557 oracle_11g 16204 18104 未找到快照信息表格
+WARNING 2025-06-02 12:26:02,794 oracle_11g 16204 18104 等待事件表格解析为空
+INFO 2025-06-02 12:26:02,801 oracle_11g 16204 18104 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:26:02,826 oracle_11g 16204 18104 未找到快照信息表格
+WARNING 2025-06-02 12:26:02,854 oracle_11g 16204 18104 未找到等待事件表格
+WARNING 2025-06-02 12:26:02,856 oracle_11g 16204 18104 未找到SQL统计表格
+INFO 2025-06-02 12:27:23,420 oracle_11g 17952 14140 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 12:27:23,425 oracle_11g 17952 14140 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 12:27:23,429 oracle_11g 17952 14140 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:27:23,429 oracle_11g 17952 14140 检测到Oracle 11g AWR格式
+INFO 2025-06-02 12:27:23,429 oracle_11g 17952 14140 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:27:23,448 oracle_11g 17952 14140 未找到数据库信息表格
+WARNING 2025-06-02 12:27:23,469 oracle_11g 17952 14140 无法解析启动时间: invalid-time
+INFO 2025-06-02 12:27:23,474 oracle_11g 17952 14140 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:27:23,479 oracle_11g 17952 14140 未找到数据库信息表格
+WARNING 2025-06-02 12:27:23,527 oracle_11g 17952 14140 未找到Load Profile表格
+WARNING 2025-06-02 12:27:23,749 oracle_11g 17952 14140 等待事件表格解析为空
+INFO 2025-06-02 12:27:23,754 oracle_11g 17952 14140 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 12:27:23,779 oracle_11g 17952 14140 未找到等待事件表格
+WARNING 2025-06-02 12:27:23,783 oracle_11g 17952 14140 未找到SQL统计表格
+INFO 2025-06-02 13:32:26,082 oracle_11g 17308 5752 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 13:32:26,089 oracle_11g 17308 5752 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 13:32:26,092 oracle_11g 17308 5752 检测到Oracle 11g AWR格式
+INFO 2025-06-02 13:32:26,093 oracle_11g 17308 5752 检测到Oracle 11g AWR格式
+INFO 2025-06-02 13:32:26,093 oracle_11g 17308 5752 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 13:32:26,108 oracle_11g 17308 5752 未找到数据库信息表格
+WARNING 2025-06-02 13:32:26,128 oracle_11g 17308 5752 无法解析启动时间: invalid-time
+INFO 2025-06-02 13:32:26,133 oracle_11g 17308 5752 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 13:32:26,138 oracle_11g 17308 5752 未找到数据库信息表格
+WARNING 2025-06-02 13:32:26,185 oracle_11g 17308 5752 未找到Load Profile表格
+WARNING 2025-06-02 13:32:26,405 oracle_11g 17308 5752 等待事件表格解析为空
+INFO 2025-06-02 13:32:26,410 oracle_11g 17308 5752 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 13:32:26,435 oracle_11g 17308 5752 未找到等待事件表格
+WARNING 2025-06-02 13:32:26,437 oracle_11g 17308 5752 未找到SQL统计表格
+INFO 2025-06-02 13:42:36,183 oracle_11g 4336 17556 找到 3 个AWR锚点，尝试作为Oracle 11g解析
+ERROR 2025-06-02 13:42:36,191 oracle_11g 4336 17556 检查Oracle 11g兼容性时出错: expected string or bytes-like object, got 'NoneType'
+INFO 2025-06-02 13:42:36,196 oracle_11g 4336 17556 检测到Oracle 11g AWR格式
+INFO 2025-06-02 13:42:36,197 oracle_11g 4336 17556 检测到Oracle 11g AWR格式
+INFO 2025-06-02 13:42:36,197 oracle_11g 4336 17556 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 13:42:36,216 oracle_11g 4336 17556 未找到数据库信息表格
+WARNING 2025-06-02 13:42:36,239 oracle_11g 4336 17556 无法解析启动时间: invalid-time
+INFO 2025-06-02 13:42:36,245 oracle_11g 4336 17556 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 13:42:36,251 oracle_11g 4336 17556 未找到数据库信息表格
+WARNING 2025-06-02 13:42:36,324 oracle_11g 4336 17556 未找到Load Profile表格
+WARNING 2025-06-02 13:42:36,406 oracle_11g 4336 17556 等待事件表格解析为空
+INFO 2025-06-02 13:42:36,413 oracle_11g 4336 17556 检测到Oracle 11g AWR格式
+WARNING 2025-06-02 13:42:36,453 oracle_11g 4336 17556 未找到等待事件表格
+WARNING 2025-06-02 13:42:36,457 oracle_11g 4336 17556 未找到SQL统计表格

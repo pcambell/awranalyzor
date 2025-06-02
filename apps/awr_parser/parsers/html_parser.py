@@ -76,6 +76,20 @@ class HTMLTableParser:
         self.logger.debug(f"解析表格完成: {len(headers)}列, {len(data_rows)}行")
         return headers, data_rows
     
+    def parse_data_table(self, table: Tag, 
+                        header_row_index: int = 0) -> Tuple[List[str], List[Dict[str, str]]]:
+        """
+        解析数据表格（parse_table_with_headers的别名）
+        
+        Args:
+            table: 表格Tag对象
+            header_row_index: 表头行索引（默认第一行）
+            
+        Returns:
+            Tuple[表头列表, 数据行列表]
+        """
+        return self.parse_table_with_headers(table, header_row_index)
+    
     def parse_key_value_table(self, table: Tag, 
                               key_column: int = 0, 
                               value_column: int = 1) -> Dict[str, str]:
@@ -563,4 +577,43 @@ class TableStructureAnalyzer:
         if time_count / len(values) > 0.5:
             return 'time'
         
-        return 'text' 
+        return 'text'
+    
+    def has_columns(self, column_names: List[str]) -> bool:
+        """
+        检查表格是否包含指定的列名
+        
+        Args:
+            column_names: 要检查的列名列表
+            
+        Returns:
+            bool: 如果表格包含所有指定列名则返回True
+        """
+        if not self.table or self.table.name != 'table':
+            return False
+        
+        rows = self.table.find_all('tr')
+        if not rows:
+            return False
+        
+        # 查找表头行（通常是第一行）
+        header_row = rows[0]
+        header_cells = header_row.find_all(['th', 'td'])
+        
+        # 提取表头文本
+        header_texts = []
+        for cell in header_cells:
+            header_text = cell.get_text(strip=True)
+            header_texts.append(header_text)
+        
+        # 检查是否包含所有指定列名
+        for column_name in column_names:
+            found = False
+            for header_text in header_texts:
+                if column_name.lower() in header_text.lower() or header_text.lower() in column_name.lower():
+                    found = True
+                    break
+            if not found:
+                return False
+        
+        return True 
