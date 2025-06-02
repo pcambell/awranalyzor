@@ -530,3 +530,59 @@ INFO 2025-06-02 14:38:09,454 factory 5108 7544 Oracle 19c解析器注册成功
 INFO 2025-06-02 14:38:09,455 factory 5108 7544 注册解析器: 11g -> Oracle11gParser
 INFO 2025-06-02 14:38:09,455 factory 5108 7544 Oracle 11g解析器注册成功
 WARNING 2025-06-02 14:38:09,455 factory 5108 7544 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 15:02:57,555 factory 9672 5108 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 15:02:57,556 factory 9672 5108 Oracle 19c解析器注册成功
+INFO 2025-06-02 15:02:57,556 factory 9672 5108 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 15:02:57,557 factory 9672 5108 Oracle 11g解析器注册成功
+WARNING 2025-06-02 15:02:57,557 factory 9672 5108 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 15:02:57,558 factory 9672 5108 初始化AWR解析器工厂
+ERROR 2025-06-02 15:02:57,558 factory 9672 5108 创建解析器时出错: 'str' object has no attribute 'value'
+ERROR 2025-06-02 15:02:57,572 factory 9672 5108 创建解析器时出错: 'str' object has no attribute 'value'
+WARNING 2025-06-02 15:02:57,572 services 9672 5108 无法创建解析器，返回默认信息
+INFO 2025-06-02 15:02:57,581 tasks 9672 5108 报告 999 解析进度: 50% - 测试阶段
+INFO 2025-06-02 15:06:08,169 factory 7476 16460 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 15:06:08,169 factory 7476 16460 Oracle 19c解析器注册成功
+INFO 2025-06-02 15:06:08,170 factory 7476 16460 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 15:06:08,170 factory 7476 16460 Oracle 11g解析器注册成功
+WARNING 2025-06-02 15:06:08,171 factory 7476 16460 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 15:06:08,171 factory 7476 16460 初始化AWR解析器工厂
+ERROR 2025-06-02 15:06:08,171 factory 7476 16460 创建解析器时出错: 'str' object has no attribute 'value'
+ERROR 2025-06-02 15:06:08,177 factory 7476 16460 创建解析器时出错: 'str' object has no attribute 'value'
+WARNING 2025-06-02 15:06:08,178 services 7476 16460 无法创建解析器，返回默认信息
+ERROR 2025-06-02 15:06:08,180 factory 7476 16460 创建解析器时出错: 'str' object has no attribute 'value'
+WARNING 2025-06-02 15:06:08,181 services 7476 16460 无法创建解析器，返回默认信息
+INFO 2025-06-02 15:06:08,189 services 7476 16460 AWR报告创建成功: 1 - 集成测试报告
+INFO 2025-06-02 15:06:08,199 tasks 7476 16460 同步执行AWR解析任务: 1
+INFO 2025-06-02 15:06:08,202 tasks 7476 16460 开始解析AWR报告: 1
+ERROR 2025-06-02 15:06:08,207 factory 7476 16460 创建解析器时出错: 'str' object has no attribute 'value'
+ERROR 2025-06-02 15:06:08,207 services 7476 16460 解析AWR报告 1 时出错: 解析失败: no_parser: 无法找到合适的解析器
+ERROR 2025-06-02 15:06:08,207 tasks 7476 16460 AWR报告 1 解析失败: 解析失败: no_parser: 无法找到合适的解析器
+ERROR 2025-06-02 15:06:08,213 tasks 7476 16460 AWR解析任务失败: 1 - 解析失败: 解析失败: no_parser: 无法找到合适的解析器
+INFO 2025-06-02 15:06:08,217 services 7476 16460 报告 1 状态更新为: failed
+ERROR 2025-06-02 15:06:08,218 services 7476 16460 AWR报告 1 解析任务调度失败
+INFO 2025-06-02 15:06:08,218 tasks 7476 16460 报告 999 解析进度: 50% - 测试阶段
+WARNING 2025-06-02 15:06:08,219 tasks 7476 16460 更新进度时报告 999 不存在
+INFO 2025-06-02 15:06:46,913 factory 14320 19924 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 15:06:46,913 factory 14320 19924 Oracle 19c解析器注册成功
+INFO 2025-06-02 15:06:46,914 factory 14320 19924 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 15:06:46,914 factory 14320 19924 Oracle 11g解析器注册成功
+WARNING 2025-06-02 15:06:46,915 factory 14320 19924 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 15:06:46,915 factory 14320 19924 初始化AWR解析器工厂
+ERROR 2025-06-02 15:06:46,915 factory 14320 19924 创建解析器时出错: 'str' object has no attribute 'value'
+ERROR 2025-06-02 15:06:46,925 factory 14320 19924 创建解析器时出错: 'str' object has no attribute 'value'
+WARNING 2025-06-02 15:06:46,925 services 14320 19924 无法创建解析器，返回默认信息
+INFO 2025-06-02 15:06:46,933 tasks 14320 19924 报告 999 解析进度: 50% - 测试阶段
+WARNING 2025-06-02 15:06:46,935 tasks 14320 19924 更新进度时报告 999 不存在
+INFO 2025-06-02 15:07:48,049 factory 14668 20340 注册解析器: 19c -> Oracle19cParser
+INFO 2025-06-02 15:07:48,049 factory 14668 20340 Oracle 19c解析器注册成功
+INFO 2025-06-02 15:07:48,049 factory 14668 20340 注册解析器: 11g -> Oracle11gParser
+INFO 2025-06-02 15:07:48,050 factory 14668 20340 Oracle 11g解析器注册成功
+WARNING 2025-06-02 15:07:48,050 factory 14668 20340 Oracle 12c解析器未找到，跳过注册: No module named 'apps.awr_parser.parsers.oracle_12c'
+INFO 2025-06-02 15:07:48,051 factory 14668 20340 初始化AWR解析器工厂
+INFO 2025-06-02 15:07:48,051 oracle_19c 14668 20340 检测到Oracle 19c AWR格式
+INFO 2025-06-02 15:07:48,052 factory 14668 20340 自动检测选择解析器: Oracle19cParser
+INFO 2025-06-02 15:07:48,053 oracle_19c 14668 20340 检测到Oracle 19c AWR格式
+ERROR 2025-06-02 15:07:48,060 factory 14668 20340 创建解析器时出错: 'str' object has no attribute 'value'
+WARNING 2025-06-02 15:07:48,060 services 14668 20340 无法创建解析器，返回默认信息
+INFO 2025-06-02 15:07:48,067 tasks 14668 20340 报告 999 解析进度: 50% - 测试阶段
+WARNING 2025-06-02 15:07:48,069 tasks 14668 20340 更新进度时报告 999 不存在

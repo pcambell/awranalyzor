@@ -1,23 +1,29 @@
+#!/usr/bin/env python3
 """
-Oracle AWR分析器 - 文件上传模块URL配置
-{{CHENGQI: P1-LD-002 创建awr_upload应用URL配置 - 2025-06-01 23:04:00 +08:00}}
+AWR上传模块URL配置
+{{CHENGQI: P2-LD-005 解析器工厂和集成 - URL路由配置 - 2025-06-02T14:50:00}}
 """
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
+
+from .views import (
+    AWRUploadView,
+    AWRReportViewSet,
+    AWRFileValidationView,
+    AWRParsingProgressView
+)
 
 app_name = 'awr_upload'
 
 # DRF路由器配置
 router = DefaultRouter()
-# router.register(r'files', views.AWRFileUploadViewSet)
+router.register(r'reports', AWRReportViewSet, basename='awrreport')
 
 urlpatterns = [
-    # DRF ViewSet路由
-    path('', include(router.urls)),
-    
-    # 文件上传相关路由
-    # path('upload/', views.FileUploadView.as_view(), name='file_upload'),
-    # path('validate/', views.FileValidateView.as_view(), name='file_validate'),
-    # path('progress/<str:upload_id>/', views.UploadProgressView.as_view(), name='upload_progress'),
+    # API接口
+    path('api/', include(router.urls)),
+    path('api/upload/', AWRUploadView.as_view(), name='upload'),
+    path('api/validate/', AWRFileValidationView.as_view(), name='validate'),
+    path('api/progress/<int:report_id>/', AWRParsingProgressView.as_view(), name='progress'),
 ] 

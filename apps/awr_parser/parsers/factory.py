@@ -155,9 +155,9 @@ class AWRParserFactory:
             
             # 如果未指定版本，则从HTML内容中检测
             if html_content is not None:
-                version = self._version_detector.detect_version(html_content)
-                if version:
-                    parser_class = self._registry.get_parser_class(version)
+                detected_version = self._version_detector.detect_version(html_content)
+                if detected_version and detected_version != OracleVersion.UNKNOWN:
+                    parser_class = self._registry.get_parser_class(detected_version)
                     if parser_class:
                         return parser_class()
                 
