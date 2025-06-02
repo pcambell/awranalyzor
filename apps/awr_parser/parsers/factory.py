@@ -61,6 +61,18 @@ class ParserRegistry:
         
         return self._parser_instances[version]
     
+    def get_parser_class(self, version: OracleVersion) -> Optional[Type[AbstractAWRParser]]:
+        """
+        获取解析器类
+        
+        Args:
+            version: Oracle版本
+            
+        Returns:
+            解析器类或None
+        """
+        return self._parsers.get(version)
+    
     def get_supported_versions(self) -> List[OracleVersion]:
         """获取支持的Oracle版本列表"""
         return list(self._parsers.keys())
@@ -92,20 +104,23 @@ class AWRParserFactory:
             # 动态导入解析器类，避免循环依赖
             from .oracle_19c import Oracle19cParser
             self._registry.register_parser(OracleVersion.ORACLE_19C, Oracle19cParser)
-        except ImportError:
-            logger.warning("Oracle 19c解析器未找到，跳过注册")
+            logger.info("Oracle 19c解析器注册成功")
+        except ImportError as e:
+            logger.warning(f"Oracle 19c解析器未找到，跳过注册: {e}")
         
         try:
             from .oracle_11g import Oracle11gParser  
             self._registry.register_parser(OracleVersion.ORACLE_11G, Oracle11gParser)
-        except ImportError:
-            logger.warning("Oracle 11g解析器未找到，跳过注册")
+            logger.info("Oracle 11g解析器注册成功")
+        except ImportError as e:
+            logger.warning(f"Oracle 11g解析器未找到，跳过注册: {e}")
         
         try:
             from .oracle_12c import Oracle12cParser
             self._registry.register_parser(OracleVersion.ORACLE_12C, Oracle12cParser)
-        except ImportError:
-            logger.warning("Oracle 12c解析器未找到，跳过注册")
+            logger.info("Oracle 12c解析器注册成功")
+        except ImportError as e:
+            logger.warning(f"Oracle 12c解析器未找到，跳过注册: {e}")
     
     def register_parser(self, version: OracleVersion, parser_class: Type[AbstractAWRParser]):
         """
@@ -117,37 +132,70 @@ class AWRParserFactory:
         """
         self._registry.register_parser(version, parser_class)
     
-    def create_parser(self, html_content: str) -> Optional[AbstractAWRParser]:
+    def create_parser(self, version: OracleVersion = None, html_content: str = None) -> Optional[AbstractAWRParser]:
         """
-        根据AWR内容自动创建合适的解析器
+        创建指定版本的解析器
+        
+        Args:
+            version: Oracle版本（如果指定，则直接创建该版本解析器）
+            html_content: AWR HTML内容（如果version未指定，则用于自动检测版本）
+            
+        Returns:
+            解析器实例或None
+        """
+        try:
+            # 如果直接指定了版本，则创建对应解析器
+            if version is not None:
+                parser_class = self._registry.get_parser_class(version)
+                if parser_class:
+                    return parser_class()
+                else:
+                    logger.error(f"未找到Oracle {version.value}解析器")
+                    return None
+            
+            # 如果未指定版本，则从HTML内容中检测
+            if html_content is not None:
+                version = self._version_detector.detect_version(html_content)
+                if version:
+                    parser_class = self._registry.get_parser_class(version)
+                    if parser_class:
+                        return parser_class()
+                
+                logger.warning("无法确定Oracle版本，尝试自动检测解析器")
+                return self.get_parser_for_content(html_content)
+            
+            logger.error("必须指定version或html_content参数")
+            return None
+            
+        except Exception as e:
+            logger.error(f"创建解析器时出错: {e}")
+            return None
+    
+    def get_parser_for_content(self, html_content: str) -> Optional[AbstractAWRParser]:
+        """
+        根据内容自动选择合适的解析器
         
         Args:
             html_content: AWR HTML内容
             
         Returns:
-            解析器实例或None（如果无法识别版本）
+            解析器实例或None
         """
-        # 检测Oracle版本
-        version = self._version_detector.detect_version(html_content)
+        # 尝试所有已注册的解析器
+        for version in self._registry.get_supported_versions():
+            try:
+                parser_class = self._registry.get_parser_class(version)
+                if parser_class:
+                    parser_instance = parser_class()
+                    if parser_instance.can_parse(html_content):
+                        logger.info(f"自动检测选择解析器: {parser_instance.__class__.__name__}")
+                        return parser_instance
+            except Exception as e:
+                logger.debug(f"测试 {version.value} 解析器时出错: {e}")
+                continue
         
-        if version == OracleVersion.UNKNOWN:
-            logger.warning("无法识别Oracle版本")
-            return None
-        
-        # 获取对应的解析器
-        parser = self._registry.get_parser(version)
-        
-        if parser is None:
-            logger.error(f"未找到 {version.value} 版本的解析器")
-            return None
-        
-        # 二次验证：确保解析器可以处理该内容
-        if not parser.can_parse(html_content):
-            logger.warning(f"{version.value} 解析器无法处理该AWR内容")
-            return None
-        
-        logger.info(f"选择解析器: {parser.__class__.__name__} for {version.value}")
-        return parser
+        logger.warning("无法找到合适的解析器处理该AWR内容")
+        return None
     
     def create_parser_by_version(self, version: OracleVersion) -> Optional[AbstractAWRParser]:
         """

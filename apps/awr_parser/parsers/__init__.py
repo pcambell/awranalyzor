@@ -11,6 +11,7 @@ from .base import AbstractAWRParser, ParseResult, ParseError
 from .factory import AWRParserFactory
 from .utils import HTMLSectionExtractor, VersionDetector, DataCleaner, AWRStructureAnalyzer
 from .html_parser import HTMLTableParser, AnchorNavigator, TableStructureAnalyzer
+from .oracle_19c import Oracle19cParser
 
 __all__ = [
     'AbstractAWRParser',
@@ -24,4 +25,5 @@ __all__ = [
     'HTMLTableParser',
     'AnchorNavigator', 
     'TableStructureAnalyzer',
+    'Oracle19cParser',
 ] 
