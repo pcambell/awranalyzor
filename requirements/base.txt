@@ -1,0 +1,31 @@
+# Oracle AWR报告分析软件 - 基础依赖
+# Created: 2025-06-01 22:46:45 +08:00
+# Python 3.13+ Required
+
+# Django核心框架
+Django==4.2.16
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+
+# 数据库相关 (开发阶段使用SQLite)
+redis==5.0.1
+
+# 异步任务处理
+celery==5.3.7
+
+# HTML解析和数据处理
+beautifulsoup4==4.12.3
+lxml==5.1.0
+pandas==2.2.0
+numpy==1.26.4
+
+# 报告生成
+reportlab==4.0.9
+openpyxl==3.1.2
+
+# 安全和验证
+django-extensions==3.2.3
+python-magic-bin==0.4.14
+
+# 环境配置
+python-decouple==3.8 

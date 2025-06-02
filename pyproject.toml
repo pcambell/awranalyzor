@@ -1,0 +1,115 @@
+# Oracle AWR分析器 - 项目配置
+# {{CHENGQI: P1-TE-004 基础测试框架配置 - 2025-06-01 23:45:00 +08:00}}
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "awranalyzor"
+version = "0.1.0"
+description = "Oracle AWR Report Analysis Software"
+authors = [{name = "AWR Analyzer Team"}]
+license = {text = "MIT"}
+requires-python = ">=3.8"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "awranalyzor.settings"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+python_classes = ["Test*", "*Tests"]
+python_functions = ["test_*"]
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers", 
+    "--strict-config",
+    "--cov=.",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--cov-fail-under=70",
+    "--tb=short",
+    "--maxfail=5",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests", 
+    "e2e: End-to-end tests",
+    "slow: Slow running tests",
+    "performance: Performance tests",
+    "security: Security tests",
+    "no_db: Tests that don't require database access",
+    "only_run: Tests that should only run under specific conditions",
+    "browser_specific: Browser-specific tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/venv/*",
+    "*/tests/*",
+    "manage.py",
+    "*/settings/*",
+    "*/__pycache__/*",
+    "*/node_modules/*",
+]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.mypy]
+python_version = "3.8"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "awranalyzor.settings"
+
+[tool.isort]
+profile = "django"
+multi_line_output = 3
+line_length = 88
+known_django = "django"
+known_first_party = ["awranalyzor"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | migrations
+)/
+''' 
