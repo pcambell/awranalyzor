@@ -23,29 +23,46 @@ class VersionDetector:
     """
     
     def __init__(self):
-        # 版本识别模式（按优先级排序）
+        self.logger = logging.getLogger(self.__class__.__name__)
+        
+        # 版本检测模式（按优先级排序）
         self.version_patterns = [
-            # Oracle 19c 特征
+            # Oracle 19c 模式
             (OracleVersion.ORACLE_19C, [
                 r'Oracle Database 19c',
                 r'Release 19\.',
                 r'19\.\d+\.\d+\.\d+',
                 r'version="19\.',
+                r'<td[^>]*>\s*19\.\d+\.\d+\.\d+\s*</td>',  # 新增: HTML表格中的版本号
+                r'19\.\d+\.\d+\.\d+\.\d+'  # 新增: 完整版本号格式
             ]),
-            # Oracle 12c 特征  
+            # Oracle 12c 模式  
             (OracleVersion.ORACLE_12C, [
                 r'Oracle Database 12c',
                 r'Release 12\.',
                 r'12\.\d+\.\d+\.\d+',
                 r'version="12\.',
+                r'<td[^>]*>\s*12\.\d+\.\d+\.\d+\s*</td>',  # 新增: HTML表格中的版本号
+                r'12\.\d+\.\d+\.\d+\.\d+'  # 新增: 完整版本号格式
             ]),
-            # Oracle 11g 特征
+            # Oracle 11g 模式
             (OracleVersion.ORACLE_11G, [
                 r'Oracle Database 11g',
                 r'Release 11\.',
                 r'11\.\d+\.\d+\.\d+',
                 r'version="11\.',
+                r'<td[^>]*>\s*11\.\d+\.\d+\.\d+\s*</td>',  # 新增: HTML表格中的版本号
+                r'11\.\d+\.\d+\.\d+\.\d+'  # 新增: 完整版本号格式
             ]),
+            # Oracle 10g 模式
+            (OracleVersion.ORACLE_10G, [
+                r'Oracle Database 10g',
+                r'Release 10\.',
+                r'10\.\d+\.\d+\.\d+',
+                r'version="10\.',
+                r'<td[^>]*>\s*10\.\d+\.\d+\.\d+\s*</td>',  # HTML表格中的版本号
+                r'10\.\d+\.\d+\.\d+\.\d+'  # 完整版本号格式
+            ])
         ]
     
     def detect_version(self, html_content: str) -> OracleVersion:
@@ -56,30 +73,56 @@ class VersionDetector:
             html_content: AWR HTML内容
             
         Returns:
-            检测到的Oracle版本
+            OracleVersion: 检测到的版本
         """
-        # 转换为小写便于匹配，但保持原始内容用于精确匹配
-        content_lower = html_content.lower()
-        
-        for version, patterns in self.version_patterns:
-            for pattern in patterns:
-                if re.search(pattern, html_content, re.IGNORECASE):
-                    logger.debug(f"检测到Oracle版本: {version.value} (匹配模式: {pattern})")
-                    return version
-        
-        # 尝试从HTML标题中提取版本信息
         try:
+            # 首先检查是否为ASH报告（而非AWR报告）
+            if self._is_ash_report(html_content):
+                self.logger.warning("检测到ASH报告，不是AWR报告")
+                return OracleVersion.UNKNOWN
+            
+            # 按优先级检查版本模式
+            for version, patterns in self.version_patterns:
+                for pattern in patterns:
+                    if re.search(pattern, html_content, re.IGNORECASE):
+                        self.logger.info(f"通过模式检测到 {version.value}")
+                        return version
+            
+            # 尝试从HTML标题中提取版本
             soup = BeautifulSoup(html_content, 'html.parser')
             title = soup.find('title')
             if title and title.string:
                 version = self._extract_version_from_title(title.string)
                 if version != OracleVersion.UNKNOWN:
+                    self.logger.info(f"从标题检测到 {version.value}")
                     return version
+            
+            # 尝试从第一个h1标签检测
+            h1 = soup.find('h1')
+            if h1 and h1.get_text():
+                version = self._extract_version_from_title(h1.get_text())
+                if version != OracleVersion.UNKNOWN:
+                    self.logger.info(f"从h1标签检测到 {version.value}")
+                    return version
+            
+            self.logger.warning("无法识别Oracle版本")
+            return OracleVersion.UNKNOWN
+            
         except Exception as e:
-            logger.warning(f"解析HTML标题失败: {e}")
+            self.logger.error(f"版本检测时出错: {e}")
+            return OracleVersion.UNKNOWN
+    
+    def detect_from_html(self, html_content: str) -> OracleVersion:
+        """
+        从HTML内容检测Oracle版本（detect_version的别名）
         
-        logger.warning("无法识别Oracle版本")
-        return OracleVersion.UNKNOWN
+        Args:
+            html_content: AWR HTML内容
+            
+        Returns:
+            检测到的Oracle版本
+        """
+        return self.detect_version(html_content)
     
     def _extract_version_from_title(self, title: str) -> OracleVersion:
         """从HTML标题中提取版本"""
@@ -91,8 +134,37 @@ class VersionDetector:
             return OracleVersion.ORACLE_12C
         elif '11g' in title_lower or 'release 11' in title_lower:
             return OracleVersion.ORACLE_11G
+        elif '10g' in title_lower or 'release 10' in title_lower:
+            return OracleVersion.ORACLE_10G
         
         return OracleVersion.UNKNOWN
+    
+    def _is_ash_report(self, html_content: str) -> bool:
+        """
+        检测是否为ASH报告（而非AWR报告）
+        
+        Args:
+            html_content: HTML内容
+            
+        Returns:
+            bool: 如果是ASH报告返回True
+        """
+        # ASH报告的特征标识
+        ash_indicators = [
+            r'ASH\s+Report',
+            r'<title[^>]*>ASH\s+Report',
+            r'<h1[^>]*>ASH\s+Report',
+            r'Active\s+Session\s+History\s+Report',
+            r'DBA_HIST_ACTIVE_SESS_HISTORY',
+            r'V\$ACTIVE_SESSION_HISTORY'
+        ]
+        
+        # 检查是否包含ASH特征
+        for pattern in ash_indicators:
+            if re.search(pattern, html_content, re.IGNORECASE):
+                return True
+        
+        return False
 
 
 class HTMLSectionExtractor:
@@ -214,9 +286,9 @@ class DataCleaner:
     """
     
     @staticmethod
-    def clean_number(value: str) -> Union[int, float, None]:
+    def clean_numeric_value(value: str) -> Union[int, float, None]:
         """
-        清理并转换数字
+        清理和转换数字值，支持单位
         
         Args:
             value: 原始字符串值
@@ -230,18 +302,51 @@ class DataCleaner:
         # 移除逗号、空格等
         cleaned = re.sub(r'[,\s]', '', str(value))
         
-        # 移除单位（如MB、KB、%等）
-        cleaned = re.sub(r'[A-Za-z%]+$', '', cleaned)
+        # 检查单位并计算乘数
+        multiplier = 1
+        units_pattern = r'([KMGTkmgt])$'
+        unit_match = re.search(units_pattern, cleaned)
+        if unit_match:
+            unit = unit_match.group(1).upper()
+            unit_multipliers = {
+                'K': 1000,
+                'M': 1000000,
+                'G': 1000000000,
+                'T': 1000000000000
+            }
+            multiplier = unit_multipliers.get(unit, 1)
+            # 移除单位
+            cleaned = re.sub(units_pattern, '', cleaned)
+        else:
+            # 移除其他单位（如%等）
+            cleaned = re.sub(r'[A-Za-z%]+$', '', cleaned)
         
         try:
-            # 尝试转换为整数
+            # 尝试转换为数字并应用乘数
             if '.' not in cleaned:
-                return int(cleaned)
+                return int(float(cleaned) * multiplier)
             else:
-                return float(cleaned)
+                return float(cleaned) * multiplier
         except ValueError:
             logger.warning(f"无法转换数字: {value}")
             return None
+    
+    @staticmethod
+    def clean_text(value: str) -> str:
+        """
+        清理文本内容
+        
+        Args:
+            value: 原始文本值
+            
+        Returns:
+            清理后的文本
+        """
+        if not value:
+            return ""
+        # 移除多余空格、换行、制表符
+        cleaned = re.sub(r'\s+', ' ', str(value).strip())
+        return cleaned
     
     @staticmethod
     def clean_percentage(value: str) -> Optional[float]:

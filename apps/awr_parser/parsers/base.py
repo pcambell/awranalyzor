@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class OracleVersion(Enum):
     """Oracle版本枚举"""
+    ORACLE_10G = "10g"
     ORACLE_11G = "11g"
     ORACLE_12C = "12c" 
     ORACLE_19C = "19c"
@@ -39,6 +40,16 @@ class ParseStatus(Enum):
     PARTIAL = "partial"
     FAILED = "failed"
     WARNING = "warning"
+
+
+class ErrorType(Enum):
+    """错误类型枚举"""
+    PARSE_ERROR = "parse_error"
+    VALIDATION_ERROR = "validation_error"
+    FORMAT_ERROR = "format_error"
+    VERSION_ERROR = "version_error"
+    DATA_ERROR = "data_error"
+    UNKNOWN_ERROR = "unknown_error"
 
 
 @dataclass
@@ -63,6 +74,7 @@ class DBInfo:
     startup_time: Optional[datetime] = None
     is_rac: bool = False
     container_name: Optional[str] = None  # CDB/PDB
+    instance_number: Optional[int] = None  # RAC实例编号
 
 
 @dataclass
@@ -182,6 +194,15 @@ class ParseResult:
         return self.parse_status in [ParseStatus.SUCCESS, ParseStatus.PARTIAL, ParseStatus.WARNING]
 
 
+class AWRError(Exception):
+    """AWR解析器异常基类"""
+    def __init__(self, message: str, error_type: ErrorType = ErrorType.PARSE_ERROR, section: str = "unknown"):
+        super().__init__(message)
+        self.message = message
+        self.error_type = error_type
+        self.section = section
+
+
 class AbstractAWRParser(ABC):
     """
     AWR解析器抽象基类
@@ -196,6 +217,17 @@ class AbstractAWRParser(ABC):
     
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.version = self.get_supported_version()
+    
+    @abstractmethod
+    def get_supported_version(self) -> OracleVersion:
+        """
+        获取此解析器支持的Oracle版本
+        
+        Returns:
+            Oracle版本枚举
+        """
+        pass
     
     @abstractmethod
     def can_parse(self, html_content: str) -> bool:

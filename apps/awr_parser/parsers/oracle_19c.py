@@ -34,6 +34,7 @@ class Oracle19cParser(AbstractAWRParser):
     
     def __init__(self):
         super().__init__()
+        self.logger.info("检测到Oracle 19c AWR格式")
         self.version = OracleVersion.ORACLE_19C
         
         # Oracle 19c特有的锚点映射
@@ -143,16 +144,53 @@ class Oracle19cParser(AbstractAWRParser):
                 if db_table:
                     break
         
+        # 尝试通过summary属性查找数据库信息表格
+        db_tables = []
+        if not db_table:
+            # 查找带有"database instance information"的表格
+            db_tables = parser.find_tables_by_summary(r'database.*instance.*information')
+            if db_tables:
+                db_table = db_tables[0]  # 使用第一个找到的表格
+        
         if not db_table:
             self.logger.warning("未找到数据库信息表格")
             return self._create_default_db_info()
         
-        # 解析键值对表格
+        # 解析第一个表格（通常包含DB基本信息）
         db_data = parser.parse_key_value_table(db_table)
         
         if not db_data:
             self.logger.warning("数据库信息表格解析为空")
             return self._create_default_db_info()
+        
+        # 如果有多个数据库信息表格，尝试从第二个表格获取实例信息
+        instance_number = None
+        if len(db_tables) > 1:
+            # 第二个表格通常包含实例信息
+            instance_table = db_tables[1]
+            instance_data = parser.parse_key_value_table(instance_table)
+            if instance_data:
+                instance_number = self._extract_instance_number(instance_data)
+            
+            # 如果第二个表格解析失败，尝试作为标准表格解析
+            if instance_number is None:
+                headers, rows = parser.parse_table_with_headers(instance_table)
+                if rows:
+                    # 查找包含实例编号的行
+                    for row in rows:
+                        for key, value in row.items():
+                            if 'inst' in key.lower() and 'num' in key.lower():
+                                try:
+                                    instance_number = int(value)
+                                    break
+                                except (ValueError, TypeError):
+                                    continue
+                        if instance_number is not None:
+                            break
+        
+        # 如果还没有找到实例编号，尝试从第一个表格提取
+        if instance_number is None:
+            instance_number = self._extract_instance_number(db_data)
         
         # 提取关键信息
         db_name = self._extract_db_name(db_data)
@@ -175,7 +213,8 @@ class Oracle19cParser(AbstractAWRParser):
             platform=platform,
             startup_time=startup_time,
             is_rac=is_rac,
-            container_name=container_name
+            container_name=container_name,
+            instance_number=instance_number
         )
     
     def parse_snapshot_info(self, soup: BeautifulSoup) -> SnapshotInfo:
@@ -382,6 +421,10 @@ class Oracle19cParser(AbstractAWRParser):
         # 转换为InstanceActivity对象列表
         return self._convert_to_instance_activities(headers, rows)
     
+    def get_supported_version(self) -> OracleVersion:
+        """返回支持的Oracle版本"""
+        return OracleVersion.ORACLE_19C
+    
     # ===== 私有辅助方法 =====
     
     def _create_default_db_info(self) -> DBInfo:
@@ -390,7 +433,8 @@ class Oracle19cParser(AbstractAWRParser):
             db_name="UNKNOWN",
             instance_name="UNKNOWN", 
             version=self.version,
-            instance_type=InstanceType.SINGLE
+            instance_type=InstanceType.SINGLE,
+            instance_number=1
         )
     
     def _create_default_snapshot_info(self) -> SnapshotInfo:
@@ -492,11 +536,36 @@ class Oracle19cParser(AbstractAWRParser):
         return InstanceType.SINGLE
     
     def _extract_container_name(self, db_data: Dict[str, str]) -> Optional[str]:
-        """提取容器名称（用于CDB/PDB）"""
-        keys = ['Container Name', 'PDB Name', 'Con Name']
-        for key in keys:
+        """
+        提取容器名称（用于CDB/PDB）
+        
+        Args:
+            db_data: 数据库信息字典
+            
+        Returns:
+            容器名称或None
+        """
+        return db_data.get('Container Name', db_data.get('container_name'))
+
+    def _extract_instance_number(self, db_data: Dict[str, str]) -> Optional[int]:
+        """
+        提取实例编号
+        
+        Args:
+            db_data: 数据库信息字典
+            
+        Returns:
+            实例编号或None
+        """
+        # 尝试不同的键名
+        for key in ['Inst Num', 'Instance Number', 'instance_number', 'inst_num']:
             if key in db_data:
-                return db_data[key].strip()
+                try:
+                    return int(db_data[key])
+                except (ValueError, TypeError):
+                    continue
+        
+        # 如果没有找到，返回None（将在create时设置默认值）
         return None
     
     def _parse_snapshot_from_kv(self, snapshot_data: Dict[str, str]) -> SnapshotInfo:
@@ -505,11 +574,13 @@ class Oracle19cParser(AbstractAWRParser):
         begin_snap_id = 0
         end_snap_id = 0
         
+        # 尝试从键值对中提取快照ID信息
         for key, value in snapshot_data.items():
-            if 'begin snap' in key.lower():
-                begin_snap_id = DataCleaner.clean_number(value) or 0
-            elif 'end snap' in key.lower():
-                end_snap_id = DataCleaner.clean_number(value) or 0
+            key_lower = key.lower()
+            if 'begin' in key_lower and ('snap' in key_lower or 'id' in key_lower):
+                begin_snap_id = DataCleaner.clean_numeric_value(value) or 0
+            elif 'end' in key_lower and ('snap' in key_lower or 'id' in key_lower):
+                end_snap_id = DataCleaner.clean_numeric_value(value) or 0
         
         # 提取时间信息
         begin_time = datetime.now()
@@ -552,8 +623,8 @@ class Oracle19cParser(AbstractAWRParser):
         end_snap_id = 0
         
         if snap_id_col:
-            begin_snap_id = DataCleaner.clean_number(begin_row.get(snap_id_col, '0')) or 0
-            end_snap_id = DataCleaner.clean_number(end_row.get(snap_id_col, '0')) or 0
+            begin_snap_id = DataCleaner.clean_numeric_value(begin_row.get(snap_id_col, '0')) or 0
+            end_snap_id = DataCleaner.clean_numeric_value(end_row.get(snap_id_col, '0')) or 0
         
         return SnapshotInfo(
             begin_snap_id=int(begin_snap_id),
@@ -646,8 +717,8 @@ class Oracle19cParser(AbstractAWRParser):
             if not metric_name:
                 continue
             
-            per_second_value = DataCleaner.clean_number(row.get(per_second_col, '0')) or 0.0
-            per_trans_value = DataCleaner.clean_number(row.get(per_trans_col, '0')) or 0.0 if per_trans_col else 0.0
+            per_second_value = DataCleaner.clean_numeric_value(row.get(per_second_col, '0')) or 0.0
+            per_trans_value = DataCleaner.clean_numeric_value(row.get(per_trans_col, '0')) or 0.0 if per_trans_col else 0.0
             
             # 映射到LoadProfile字段
             if 'db time' in metric_name:
@@ -712,8 +783,8 @@ class Oracle19cParser(AbstractAWRParser):
             if not event_name or event_name.lower() in ['total', 'other']:
                 continue
             
-            waits = int(DataCleaner.clean_number(row.get(waits_col, '0')) or 0)
-            total_time = float(DataCleaner.clean_number(row.get(time_col, '0')) or 0.0)
+            waits = int(DataCleaner.clean_numeric_value(row.get(waits_col, '0')) or 0)
+            total_time = float(DataCleaner.clean_numeric_value(row.get(time_col, '0')) or 0.0)
             pct_db_time = DataCleaner.clean_percentage(row.get(pct_col, '0%')) or 0.0
             wait_class = row.get(class_col, 'Unknown').strip() if class_col else 'Unknown'
             
@@ -773,11 +844,11 @@ class Oracle19cParser(AbstractAWRParser):
                 continue
             
             sql_text = row.get(sql_text_col, '').strip()[:500] if sql_text_col else ''  # 限制长度
-            executions = int(DataCleaner.clean_number(row.get(executions_col, '0')) or 0)
-            elapsed_time = float(DataCleaner.clean_number(row.get(elapsed_col, '0')) or 0.0)
-            cpu_time = float(DataCleaner.clean_number(row.get(cpu_col, '0')) or 0.0)
-            gets = int(DataCleaner.clean_number(row.get(gets_col, '0')) or 0)
-            reads = int(DataCleaner.clean_number(row.get(reads_col, '0')) or 0)
+            executions = int(DataCleaner.clean_numeric_value(row.get(executions_col, '0')) or 0)
+            elapsed_time = float(DataCleaner.clean_numeric_value(row.get(elapsed_col, '0')) or 0.0)
+            cpu_time = float(DataCleaner.clean_numeric_value(row.get(cpu_col, '0')) or 0.0)
+            gets = int(DataCleaner.clean_numeric_value(row.get(gets_col, '0')) or 0)
+            reads = int(DataCleaner.clean_numeric_value(row.get(reads_col, '0')) or 0)
             
             sql_stat = SQLStatistic(
                 sql_id=sql_id,
@@ -824,9 +895,9 @@ class Oracle19cParser(AbstractAWRParser):
             if not statistic_name:
                 continue
             
-            total_value = DataCleaner.clean_number(row.get(total_col, '0')) or 0
-            per_second = float(DataCleaner.clean_number(row.get(per_second_col, '0')) or 0.0)
-            per_transaction = float(DataCleaner.clean_number(row.get(per_trans_col, '0')) or 0.0)
+            total_value = DataCleaner.clean_numeric_value(row.get(total_col, '0')) or 0
+            per_second = float(DataCleaner.clean_numeric_value(row.get(per_second_col, '0')) or 0.0)
+            per_transaction = float(DataCleaner.clean_numeric_value(row.get(per_trans_col, '0')) or 0.0)
             
             activity = InstanceActivity(
                 statistic_name=statistic_name,

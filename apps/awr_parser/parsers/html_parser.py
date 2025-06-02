@@ -126,32 +126,61 @@ class HTMLTableParser:
     
     def find_table_by_caption(self, caption_pattern: str) -> Optional[Tag]:
         """
-        根据表格标题查找表格
+        根据标题模式查找表格
         
         Args:
-            caption_pattern: 标题匹配模式（正则表达式）
+            caption_pattern: 标题正则模式
             
         Returns:
             匹配的表格Tag或None
         """
+        pattern = re.compile(caption_pattern, re.IGNORECASE)
+        
+        # 首先查找所有表格
         for table in self.soup.find_all('table'):
-            # 查找caption标签
+            # 检查caption标签
             caption = table.find('caption')
-            if caption and re.search(caption_pattern, caption.get_text(), re.IGNORECASE):
+            if caption and pattern.search(caption.get_text(strip=True)):
+                self.logger.debug(f"通过caption找到表格: {caption_pattern}")
                 return table
             
-            # 查找表格前的标题元素
+            # 检查表格前的标题元素
             prev_element = table.previous_sibling
             while prev_element:
-                if isinstance(prev_element, Tag):
-                    if prev_element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-                        if re.search(caption_pattern, prev_element.get_text(), re.IGNORECASE):
-                            return table
+                if isinstance(prev_element, Tag) and prev_element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']:
+                    if pattern.search(prev_element.get_text(strip=True)):
+                        self.logger.debug(f"通过前置标题找到表格: {caption_pattern}")
+                        return table
                     break
                 prev_element = prev_element.previous_sibling
         
         self.logger.debug(f"未找到标题匹配 '{caption_pattern}' 的表格")
         return None
+
+    def find_tables_by_summary(self, summary_pattern: str) -> List[Tag]:
+        """
+        根据summary属性模式查找表格
+        
+        Args:
+            summary_pattern: summary属性正则模式
+            
+        Returns:
+            匹配的表格Tag列表
+        """
+        pattern = re.compile(summary_pattern, re.IGNORECASE)
+        matched_tables = []
+        
+        # 查找所有带summary属性的表格
+        for table in self.soup.find_all('table', {'summary': True}):
+            summary_text = table.get('summary', '')
+            if pattern.search(summary_text):
+                self.logger.debug(f"通过summary找到表格: {summary_pattern}")
+                matched_tables.append(table)
+        
+        if not matched_tables:
+            self.logger.debug(f"未找到summary匹配 '{summary_pattern}' 的表格")
+        
+        return matched_tables
     
     def extract_numeric_columns(self, data_rows: List[Dict[str, str]], 
                                 columns: List[str]) -> Dict[str, List[Union[int, float, None]]]:

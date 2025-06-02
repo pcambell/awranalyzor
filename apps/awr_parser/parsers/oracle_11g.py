@@ -36,6 +36,7 @@ class Oracle11gParser(AbstractAWRParser):
     
     def __init__(self):
         super().__init__()
+        self.logger.info("检测到Oracle 11g AWR格式")
         self.version = OracleVersion.ORACLE_11G
         
         # Oracle 11g特有的锚点映射（与19c基本相同，但可能有细微差异）
@@ -167,6 +168,9 @@ class Oracle11gParser(AbstractAWRParser):
         instance_type = self._detect_instance_type_11g(db_data)
         is_rac = instance_type == InstanceType.RAC
         
+        # 提取实例编号（用于RAC）
+        instance_number = self._extract_instance_number(db_data)
+        
         # 11g不支持容器数据库
         container_name = None
         
@@ -179,7 +183,8 @@ class Oracle11gParser(AbstractAWRParser):
             platform=platform,
             startup_time=startup_time,
             is_rac=is_rac,
-            container_name=container_name
+            container_name=container_name,
+            instance_number=instance_number
         )
     
     def parse_snapshot_info(self, soup: BeautifulSoup) -> SnapshotInfo:
@@ -406,7 +411,8 @@ class Oracle11gParser(AbstractAWRParser):
             platform=None,
             startup_time=None,
             is_rac=False,
-            container_name=None
+            container_name=None,
+            instance_number=1  # 默认实例编号为1
         )
     
     def _create_default_snapshot_info(self) -> SnapshotInfo:
@@ -512,6 +518,33 @@ class Oracle11gParser(AbstractAWRParser):
         
         # 11g默认为单实例
         return InstanceType.SINGLE
+    
+    def _extract_instance_number(self, db_data: Dict[str, str]) -> Optional[int]:
+        """提取实例编号（用于RAC）"""
+        patterns = ['Instance Number', 'Instance', 'Inst Num', 'INSTANCE_NUMBER']
+        
+        # 首先尝试直接匹配
+        instance_str = self._get_value_by_patterns(db_data, patterns, None)
+        if instance_str:
+            instance_num = self._safe_int(instance_str, 0)
+            if instance_num > 0:
+                return instance_num
+        
+        # 如果没有找到直接的实例编号，尝试从实例名中提取
+        instance_name = self._extract_instance_name(db_data)
+        if instance_name and instance_name != "UNKNOWN":
+            # 尝试从实例名末尾提取数字（如ORCL1, ORCL2等）
+            import re
+            match = re.search(r'(\d+)$', instance_name)
+            if match:
+                return int(match.group(1))
+        
+        # 如果检测到是RAC，默认返回1，否则返回None
+        instance_type = self._detect_instance_type_11g(db_data)
+        if instance_type == InstanceType.RAC:
+            return 1
+        
+        return None
     
     # =================== 复用19c的核心解析方法 ===================
     
@@ -938,4 +971,8 @@ class Oracle11gParser(AbstractAWRParser):
             cleaned = re.sub(r'[,\s]', '', str(value))
             return float(cleaned)
         except (ValueError, TypeError):
-            return default 
+            return default
+
+    def get_supported_version(self) -> OracleVersion:
+        """返回支持的Oracle版本"""
+        return OracleVersion.ORACLE_11G 
