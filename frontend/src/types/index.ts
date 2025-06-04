@@ -25,8 +25,76 @@ export interface UploadedFile {
   error_message?: string;
 }
 
-// AWR解析结果类型
+// ReportDisplay组件使用的新AWR解析结果类型
 export interface AWRParseResult {
+  id: string;
+  report_id?: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  data_completeness?: number;
+  data_quality_score?: number;
+  error_message?: string | null;
+  db_info?: {
+    db_name: string;
+    instance_name: string;
+    db_version: string;
+    host_name: string;
+    platform?: string;
+    rac_instances?: any;
+    cdb_name?: string;
+    pdb_name?: string;
+  };
+  snapshot_info?: {
+    begin_snap_id: number;
+    end_snap_id: number;
+    begin_time: string;
+    end_time: string;
+    snapshot_duration_minutes?: number;
+  };
+  parse_metadata?: {
+    parse_duration_seconds?: number;
+    parser_version?: string;
+    oracle_version?: string;
+  };
+  load_profile?: LoadProfileMetric[];
+  wait_events?: WaitEvent[];
+  sql_statistics?: SqlStatistic[];
+}
+
+// Load Profile指标类型
+export interface LoadProfileMetric {
+  metric_name: string;
+  per_second?: number;
+  per_transaction?: number;
+  per_exec?: number;
+  per_call?: number;
+}
+
+// 等待事件类型（ReportDisplay版本）
+export interface WaitEvent {
+  event_name: string;
+  waits?: number;
+  time_waited_seconds?: number;
+  avg_wait_ms?: number;
+  percent_db_time?: number;
+  wait_class?: string;
+}
+
+// SQL统计类型（ReportDisplay版本）
+export interface SqlStatistic {
+  sql_id: string;
+  executions?: number;
+  cpu_time_seconds?: number;
+  elapsed_time_seconds?: number;
+  buffer_gets?: number;
+  disk_reads?: number;
+  rows_processed?: number;
+  sql_text?: string;
+  module?: string;
+  parsing_schema?: string;
+}
+
+// 原始AWR解析结果类型（保持向后兼容）
+export interface LegacyAWRParseResult {
   id: string;
   file_id: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
@@ -39,8 +107,8 @@ export interface AWRParseResult {
     db_info?: DatabaseInfo;
     snapshot_info?: SnapshotInfo;
     load_profile?: LoadProfile;
-    wait_events?: WaitEvent[];
-    sql_stats?: SQLStatistic[];
+    wait_events?: LegacyWaitEvent[];
+    sql_stats?: LegacySQLStatistic[];
     instance_activity?: InstanceActivity[];
   };
 }
@@ -87,8 +155,8 @@ export interface LoadProfile {
   db_block_changes: number;
 }
 
-// 等待事件
-export interface WaitEvent {
+// 等待事件（原始版本）
+export interface LegacyWaitEvent {
   event_name: string;
   waits: number;
   time_waited_ms: number;
@@ -97,8 +165,8 @@ export interface WaitEvent {
   wait_class?: string;
 }
 
-// SQL统计
-export interface SQLStatistic {
+// SQL统计（原始版本）
+export interface LegacySQLStatistic {
   sql_id: string;
   executions: number;
   cpu_time: number;

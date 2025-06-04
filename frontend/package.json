@@ -16,6 +16,7 @@
     "@types/react-router-dom": "^5.3.3",
     "antd": "^5.25.4",
     "axios": "^1.9.0",
+    "echarts": "^5.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
@@ -35,6 +36,14 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(echarts|zrender)/)"
+    ],
+    "moduleNameMapper": {
+      "^echarts/(.*)$": "<rootDir>/node_modules/echarts/$1"
+    }
   },
   "browserslist": {
     "production": [

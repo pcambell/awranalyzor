@@ -4,6 +4,45 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
+// Mock ECharts to avoid ES module issues
+const mockChartInstance = {
+  dispose: jest.fn(),
+  setOption: jest.fn(),
+  resize: jest.fn(),
+  on: jest.fn(),
+  off: jest.fn(),
+  getZr: jest.fn(() => ({
+    on: jest.fn(),
+    off: jest.fn(),
+  })),
+  getDom: jest.fn(() => ({
+    style: {},
+    clientWidth: 400,
+    clientHeight: 300
+  }))
+};
+
+jest.mock('echarts/core', () => ({
+  use: jest.fn(),
+  init: jest.fn(() => mockChartInstance),
+}));
+
+jest.mock('echarts/components', () => ({
+  TitleComponent: {},
+  TooltipComponent: {},
+  LegendComponent: {},
+  GridComponent: {},
+}));
+
+jest.mock('echarts/charts', () => ({
+  PieChart: {},
+  BarChart: {},
+}));
+
+jest.mock('echarts/renderers', () => ({
+  CanvasRenderer: {},
+}));
+
 // Mock window.matchMedia for Ant Design responsive components
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
