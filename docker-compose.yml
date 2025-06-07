@@ -1,0 +1,207 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  db:
+    image: postgres:15-alpine
+    container_name: awranalyzor_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: awranalyzor
+      POSTGRES_USER: awruser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-awrpass123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U awruser -d awranalyzor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis缓存和消息队列
+  redis:
+    image: redis:7-alpine
+    container_name: awranalyzor_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redispass123}
+    volumes:
+      - redis_data:/data
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Django后端应用
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_backend
+    restart: unless-stopped
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - DATABASE_URL=postgresql://awruser:${DB_PASSWORD:-awrpass123}@db:5432/awranalyzor
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - DEBUG=False
+      - ALLOWED_HOSTS=localhost,127.0.0.1,frontend
+    volumes:
+      - media_files:/app/media
+      - static_files:/app/staticfiles
+      - log_files:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_celery_worker
+    restart: unless-stopped
+    command: celery -A awranalyzor worker -l info -Q awr_parsing,performance_analysis,report_generation,default
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - DATABASE_URL=postgresql://awruser:${DB_PASSWORD:-awrpass123}@db:5432/awranalyzor
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - DEBUG=False
+    volumes:
+      - media_files:/app/media
+      - log_files:/app/logs
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "celery", "-A", "awranalyzor", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Beat (定时任务)
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_celery_beat
+    restart: unless-stopped
+    command: celery -A awranalyzor beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - DATABASE_URL=postgresql://awruser:${DB_PASSWORD:-awrpass123}@db:5432/awranalyzor
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - DEBUG=False
+    volumes:
+      - log_files:/app/logs
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - awranalyzor_network
+
+  # React前端应用
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx负载均衡器（可选，用于多后端实例）
+  nginx_lb:
+    image: nginx:1.24-alpine
+    container_name: awranalyzor_nginx_lb
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx_lb.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - awranalyzor_network
+    profiles:
+      - loadbalancer
+
+  # 监控服务 - Flower (Celery监控)
+  flower:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_flower
+    restart: unless-stopped
+    command: celery -A awranalyzor flower --port=5555
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-redispass123}@redis:6379/0
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - celery_worker
+    networks:
+      - awranalyzor_network
+    profiles:
+      - monitoring
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  media_files:
+    driver: local
+  static_files:
+    driver: local
+  log_files:
+    driver: local
+
+networks:
+  awranalyzor_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 
