@@ -17,8 +17,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from .models import AWRReport
-from apps.awr_parser.parsers.factory import create_parser, parse_awr
-from apps.awr_parser.parsers.base import ParseResult, OracleVersion
+from awr_parser.parsers.factory import create_parser, parse_awr
+from awr_parser.parsers.base import ParseResult, OracleVersion
 
 logger = logging.getLogger(__name__)
 
