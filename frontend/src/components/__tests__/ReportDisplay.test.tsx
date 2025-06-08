@@ -18,9 +18,9 @@ const mockParseResult: AWRParseResult = {
     db_version: '19.3.0.0.0',
     host_name: 'test-server',
     platform: 'Linux x86-64',
-    rac_instances: null,
-    cdb_name: null,
-    pdb_name: null
+    rac_instances: undefined,
+    cdb_name: undefined,
+    pdb_name: undefined
   },
   snapshot_info: {
     begin_snap_id: 100,
@@ -39,8 +39,8 @@ const mockParseResult: AWRParseResult = {
       metric_name: 'DB CPU',
       per_second: 2.5,
       per_transaction: 45.2,
-      per_exec: null,
-      per_call: null
+      per_exec: undefined,
+      per_call: undefined
     }
   ],
   wait_events: [

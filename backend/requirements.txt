@@ -38,4 +38,6 @@ django-celery-results==2.5.0
 
 # 其他实用工具
 python-decouple==3.8
-Pillow==10.1.0 
+Pillow==10.1.0
+gunicorn==21.2.0
+django-extensions==3.2.3

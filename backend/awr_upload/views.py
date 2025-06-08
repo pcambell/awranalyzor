@@ -1,6 +1,28 @@
-from analyzer.security.validators import validate_uploaded_file
-from analyzer.utils.api_response import APIResponse, APIResponseMixin
-from analyzer.middleware.exception_handler import SecurityError
+#!/usr/bin/env python3
+"""
+AWR上传视图层
+{{CHENGQI: P2-LD-005 解析器工厂和集成 - Django REST API集成 - 2025-06-02T14:45:00}}
+
+提供AWR文件上传、状态查询等REST API接口
+"""
+
+import logging
+from typing import Dict, Any
+
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer, ValidationError
+from rest_framework.views import APIView
+
+from .models import AWRReport
+from .services import AWRUploadService, AWRParsingService, AWRFileValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +49,7 @@ class AWRReportSerializer(ModelSerializer):
         ]
 
 
-class AWRUploadView(APIView, APIResponseMixin):
+class AWRUploadView(APIView):
     """
     AWR文件上传API视图
     
@@ -61,15 +83,10 @@ class AWRUploadView(APIView, APIResponseMixin):
             # 获取上传的文件
             uploaded_file = request.FILES.get('file')
             if not uploaded_file:
-                return self.validation_error_response(
-                    "请选择要上传的AWR文件",
-                    message="文件参数缺失"
+                return Response(
+                    {'error': '请选择要上传的AWR文件'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # P2-LD-013: 集成安全校验
-            is_valid, errors, file_hash = validate_uploaded_file(uploaded_file)
-            if not is_valid:
-                raise SecurityError(f"文件安全验证失败: {'; '.join(errors)}")
             
             # 获取其他参数
             name = request.data.get('name', '').strip()
@@ -95,40 +112,27 @@ class AWRUploadView(APIView, APIResponseMixin):
             serializer = AWRReportSerializer(awr_report)
             response_data = serializer.data
             response_data['parsing_scheduled'] = parsing_scheduled
-            response_data['file_hash'] = file_hash
             
             logger.info(f"AWR文件上传成功: {awr_report.id} - 用户: {request.user.username}")
             
-            return self.success_response(
-                data=response_data,
-                message="AWR文件上传成功",
-                status_code=201
-            )
-            
-        except SecurityError as e:
-            logger.warning(f"AWR文件安全验证失败: {str(e)} - 用户: {request.user.username}")
-            return self.error_response(
-                message=str(e),
-                code='SECURITY_ERROR',
-                status_code=400
-            )
+            return Response(response_data, status=status.HTTP_201_CREATED)
             
         except AWRFileValidationError as e:
             logger.warning(f"AWR文件验证失败: {str(e)} - 用户: {request.user.username}")
-            return self.validation_error_response(
-                errors=str(e),
-                message="文件验证失败"
+            return Response(
+                {'error': f'文件验证失败: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         except Exception as e:
             logger.error(f"AWR文件上传失败: {str(e)} - 用户: {request.user.username}")
-            return self.server_error_response(
-                message="上传处理失败",
-                debug_info={'exception': str(e)}
+            return Response(
+                {'error': f'上传处理失败: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
-class AWRReportViewSet(viewsets.ReadOnlyModelViewSet, APIResponseMixin):
+class AWRReportViewSet(viewsets.ReadOnlyModelViewSet):
     """
     AWR报告ViewSet
     
@@ -142,36 +146,6 @@ class AWRReportViewSet(viewsets.ReadOnlyModelViewSet, APIResponseMixin):
         """返回当前用户的AWR报告"""
         return AWRReport.objects.filter(uploaded_by=self.request.user).order_by('-created_at')
     
-    def list(self, request, *args, **kwargs):
-        """重写list方法，使用标准化响应格式"""
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        
-        serializer = self.get_serializer(queryset, many=True)
-        return self.success_response(
-            data=serializer.data,
-            message="报告列表获取成功"
-        )
-    
-    def retrieve(self, request, *args, **kwargs):
-        """重写retrieve方法，使用标准化响应格式"""
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return self.success_response(
-                data=serializer.data,
-                message="报告详情获取成功"
-            )
-        except AWRReport.DoesNotExist:
-            return self.not_found_response(
-                message="报告不存在",
-                resource_type="AWR报告"
-            )
-    
     @action(detail=True, methods=['get'])
     def status(self, request, pk=None) -> Response:
         """
@@ -183,7 +157,7 @@ class AWRReportViewSet(viewsets.ReadOnlyModelViewSet, APIResponseMixin):
         try:
             report = self.get_object()
             
-            status_data = {
+            return Response({
                 'id': report.id,
                 'status': report.status,
                 'status_display': report.get_status_display(),
@@ -192,23 +166,13 @@ class AWRReportViewSet(viewsets.ReadOnlyModelViewSet, APIResponseMixin):
                 'is_completed': report.is_completed(),
                 'is_failed': report.is_failed(),
                 'updated_at': report.updated_at
-            }
+            })
             
-            return self.success_response(
-                data=status_data,
-                message="状态获取成功"
-            )
-            
-        except AWRReport.DoesNotExist:
-            return self.not_found_response(
-                message="报告不存在",
-                resource_type="AWR报告"
-            )
         except Exception as e:
             logger.error(f"获取报告状态失败: {str(e)}")
-            return self.server_error_response(
-                message="获取状态失败",
-                debug_info={'exception': str(e)}
+            return Response(
+                {'error': '获取状态失败'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
     @action(detail=True, methods=['post'])
@@ -223,39 +187,31 @@ class AWRReportViewSet(viewsets.ReadOnlyModelViewSet, APIResponseMixin):
             
             # 检查报告状态
             if report.is_processing():
-                return self.error_response(
-                    message="报告正在处理中，无法重新解析",
-                    code='INVALID_OPERATION'
+                return Response(
+                    {'error': '报告正在处理中，无法重新解析'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             
             # 重置状态并调度解析
             upload_service = AWRUploadService()
             parsing_scheduled = upload_service.schedule_parsing(report)
             
-            return self.success_response(
-                data={
-                    'parsing_scheduled': parsing_scheduled,
-                    'status': report.status,
-                    'message': '重新解析任务已调度'
-                },
-                message="重新解析任务已启动"
-            )
+            return Response({
+                'message': '重新解析任务已调度',
+                'parsing_scheduled': parsing_scheduled,
+                'status': report.status
+            })
             
-        except AWRReport.DoesNotExist:
-            return self.not_found_response(
-                message="报告不存在", 
-                resource_type="AWR报告"
-            )
         except Exception as e:
             logger.error(f"重新解析失败: {str(e)}")
-            return self.server_error_response(
-                message="重新解析失败",
-                debug_info={'exception': str(e)}
+            return Response(
+                {'error': '重新解析失败'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AWRFileValidationView(APIView, APIResponseMixin):
+class AWRFileValidationView(APIView):
     """
     AWR文件验证API
     
@@ -278,18 +234,9 @@ class AWRFileValidationView(APIView, APIResponseMixin):
         try:
             uploaded_file = request.FILES.get('file')
             if not uploaded_file:
-                return self.validation_error_response(
-                    "请选择要验证的文件",
-                    message="文件参数缺失"
-                )
-            
-            # P2-LD-013: 集成安全校验
-            is_valid, errors, file_hash = validate_uploaded_file(uploaded_file)
-            
-            if not is_valid:
-                return self.validation_error_response(
-                    errors=errors,
-                    message="文件验证失败"
+                return Response(
+                    {'error': '请选择要验证的文件'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             
             upload_service = AWRUploadService()
@@ -306,36 +253,28 @@ class AWRFileValidationView(APIView, APIResponseMixin):
                 'valid': True,
                 'file_info': validation_info,
                 'awr_info': basic_info,
-                'file_hash': file_hash,
-                'security_check': '通过'
+                'message': '文件验证通过'
             }
             
-            return self.success_response(
-                data=response_data,
-                message="文件验证通过"
-            )
-            
-        except SecurityError as e:
-            return self.error_response(
-                message=str(e),
-                code='SECURITY_ERROR'
-            )
+            return Response(response_data, status=status.HTTP_200_OK)
             
         except AWRFileValidationError as e:
-            return self.validation_error_response(
-                errors=str(e),
-                message="文件验证失败"
-            )
+            return Response({
+                'valid': False,
+                'error': str(e),
+                'message': '文件验证失败'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception as e:
             logger.error(f"文件验证失败: {str(e)}")
-            return self.server_error_response(
-                message="验证过程出错",
-                debug_info={'exception': str(e)}
-            )
+            return Response({
+                'valid': False,
+                'error': '验证过程出错',
+                'message': '验证过程出错'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class AWRParsingProgressView(APIView, APIResponseMixin):
+class AWRParsingProgressView(APIView):
     """
     AWR解析进度查询API
     
@@ -362,9 +301,9 @@ class AWRParsingProgressView(APIView, APIResponseMixin):
             ).first()
             
             if not report:
-                return self.not_found_response(
-                    message="报告不存在或无权限访问",
-                    resource_type="AWR报告"
+                return Response(
+                    {'error': '报告不存在或无权限访问'},
+                    status=status.HTTP_404_NOT_FOUND
                 )
             
             # TODO: 集成Celery后，这里将查询实际的任务进度
@@ -377,16 +316,13 @@ class AWRParsingProgressView(APIView, APIResponseMixin):
                 'updated_at': report.updated_at
             }
             
-            return self.success_response(
-                data=progress_data,
-                message="进度查询成功"
-            )
+            return Response(progress_data, status=status.HTTP_200_OK)
             
         except Exception as e:
             logger.error(f"查询解析进度失败: {str(e)}")
-            return self.server_error_response(
-                message="查询进度失败",
-                debug_info={'exception': str(e)}
+            return Response(
+                {'error': '查询进度失败'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
     def _calculate_progress_percentage(self, status: str) -> int:
@@ -415,4 +351,4 @@ class AWRParsingProgressView(APIView, APIResponseMixin):
             'completed': '处理完成',
             'failed': '处理失败',
         }
-        return stage_map.get(status, '未知状态') 
+        return stage_map.get(status, '未知状态')

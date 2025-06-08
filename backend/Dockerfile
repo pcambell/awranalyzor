@@ -54,11 +54,13 @@ WORKDIR /app
 COPY --chown=awrapp:awrapp . .
 
 # 创建必要的目录
-RUN mkdir -p /app/logs /app/media /app/staticfiles && \
+RUN mkdir -p /app/logs /app/media /app/staticfiles /app/awranalyzor/logs && \
     chown -R awrapp:awrapp /app
 
 # 收集静态文件
-RUN python manage.py collectstatic --noinput --settings=awranalyzor.settings.production
+ENV SECRET_KEY=build-time-secret-key-only-for-collectstatic
+ENV DJANGO_SETTINGS_MODULE=awranalyzor.settings.base
+RUN python manage.py collectstatic --noinput
 
 # 切换到非root用户
 USER awrapp

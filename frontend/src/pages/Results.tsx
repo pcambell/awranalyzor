@@ -24,7 +24,7 @@ import ReportDisplay from '../components/ReportDisplay';
 import WaitEventsChart from '../components/WaitEventsChart';
 import { AWRParseResult } from '../types';
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
 const { TabPane } = Tabs;
 
 const Results: React.FC = () => {
@@ -80,9 +80,9 @@ const Results: React.FC = () => {
         db_version: '19.3.0.0.0',
         host_name: 'db-server-01',
         platform: 'Linux x86-64',
-        rac_instances: null,
-        cdb_name: null,
-        pdb_name: null
+        rac_instances: undefined,
+        cdb_name: undefined,
+        pdb_name: undefined
       },
       snapshot_info: {
         begin_snap_id: 12345,
@@ -101,22 +101,22 @@ const Results: React.FC = () => {
           metric_name: 'DB CPU',
           per_second: 2.5,
           per_transaction: 45.2,
-          per_exec: null,
-          per_call: null
+          per_exec: undefined,
+          per_call: undefined
         },
         {
           metric_name: 'Logical reads',
           per_second: 1500.8,
           per_transaction: 25000,
           per_exec: 120.5,
-          per_call: null
+          per_call: undefined
         },
         {
           metric_name: 'Physical reads',
           per_second: 85.2,
           per_transaction: 1420,
           per_exec: 6.8,
-          per_call: null
+          per_call: undefined
         }
       ],
       wait_events: [
@@ -252,11 +252,22 @@ const Results: React.FC = () => {
       <Tabs defaultActiveKey="report" type="card" size="large">
         {/* 报告详情标签页 */}
         <TabPane tab="报告详情" key="report">
-          <ReportDisplay
-            parseResult={parseResult}
-            loading={loading}
-            onExport={handleExport}
-          />
+          {parseResult ? (
+            <ReportDisplay
+              parseResult={parseResult}
+              loading={loading}
+              onExport={handleExport}
+            />
+          ) : (
+            <Card>
+              <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                <Spin size="large" />
+                <div style={{ marginTop: 16 }}>
+                  <Text>正在加载解析结果...</Text>
+                </div>
+              </div>
+            </Card>
+          )}
         </TabPane>
 
         {/* 图表分析标签页 */}

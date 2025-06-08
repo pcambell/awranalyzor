@@ -41,7 +41,7 @@ const WaitEventsChart: React.FC<WaitEventsChartProps> = ({
   height = 400
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstance = useRef<echarts.ECharts>();
+  const chartInstance = useRef<echarts.ECharts | null>(null);
 
   // 数据预处理 - DRY原则：避免重复计算
   const chartData = useMemo(() => {
@@ -49,13 +49,13 @@ const WaitEventsChart: React.FC<WaitEventsChartProps> = ({
     
     // 取前10个等待事件，按时间排序
     const topEvents = waitEvents
-      .filter(event => event.time_waited_seconds > 0)
-      .sort((a, b) => b.time_waited_seconds - a.time_waited_seconds)
+      .filter(event => event.time_waited_seconds != null && event.time_waited_seconds > 0)
+      .sort((a, b) => (b.time_waited_seconds || 0) - (a.time_waited_seconds || 0))
       .slice(0, 10);
     
     return topEvents.map(event => ({
       name: event.event_name,
-      value: event.time_waited_seconds,
+      value: event.time_waited_seconds || 0,
       percentage: event.percent_db_time || 0,
       waits: event.waits || 0,
       avgWait: event.avg_wait_ms || 0

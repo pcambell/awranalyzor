@@ -1,0 +1,114 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.06kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [builder 1/5] FROM docker.io/library/python:3.11-slim
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 184.93kB done
+#5 DONE 0.0s
+
+#6 [production 2/8] RUN groupadd -r awrapp && useradd -r -g awrapp awrapp
+#6 CACHED
+
+#7 [builder 3/5] RUN python -m venv /opt/venv
+#7 CACHED
+
+#8 [production 4/8] COPY --from=builder /opt/venv /opt/venv
+#8 CACHED
+
+#9 [builder 5/5] RUN pip install --upgrade pip &&     pip install -r requirements.txt
+#9 CACHED
+
+#10 [production 6/8] COPY --chown=awrapp:awrapp . .
+#10 CACHED
+
+#11 [builder 4/5] COPY requirements.txt .
+#11 CACHED
+
+#12 [production 5/8] WORKDIR /app
+#12 CACHED
+
+#13 [production 3/8] RUN apt-get update && apt-get install -y     libpq5     curl     && rm -rf /var/lib/apt/lists/*
+#13 CACHED
+
+#14 [builder 2/5] RUN apt-get update && apt-get install -y     build-essential     libpq-dev     gcc     libxml2-dev     libxslt1-dev     zlib1g-dev     && rm -rf /var/lib/apt/lists/*
+#14 CACHED
+
+#15 [production 7/8] RUN mkdir -p /app/logs /app/media /app/staticfiles &&     chown -R awrapp:awrapp /app
+#15 CACHED
+
+#16 [production 8/8] RUN python manage.py collectstatic --noinput --settings=awranalyzor.settings.production
+#16 0.962 Traceback (most recent call last):
+#16 0.962   File "/usr/local/lib/python3.11/logging/__init__.py", line 476, in validate
+#16 0.962     raise ValueError('invalid field name/expression: %r' % fieldname)
+#16 0.962 ValueError: invalid field name/expression: '"level"'
+#16 0.962 
+#16 0.962 During handling of the above exception, another exception occurred:
+#16 0.962 
+#16 0.962 Traceback (most recent call last):
+#16 0.962   File "/usr/local/lib/python3.11/logging/config.py", line 552, in configure
+#16 0.962     formatters[name] = self.configure_formatter(
+#16 0.962                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+#16 0.962   File "/usr/local/lib/python3.11/logging/config.py", line 691, in configure_formatter
+#16 0.962     result = c(fmt, dfmt, style)
+#16 0.962              ^^^^^^^^^^^^^^^^^^^
+#16 0.962   File "/usr/local/lib/python3.11/logging/__init__.py", line 598, in __init__
+#16 0.963     self._style.validate()
+#16 0.963   File "/usr/local/lib/python3.11/logging/__init__.py", line 483, in validate
+#16 0.963     raise ValueError('invalid format: %s' % e)
+#16 0.963 ValueError: invalid format: invalid field name/expression: '"level"'
+#16 0.963 
+#16 0.963 The above exception was the direct cause of the following exception:
+#16 0.963 
+#16 0.963 Traceback (most recent call last):
+#16 0.963   File "/app/manage.py", line 22, in <module>
+#16 0.963     main()
+#16 0.963   File "/app/manage.py", line 18, in main
+#16 0.963     execute_from_command_line(sys.argv)
+#16 0.963   File "/opt/venv/lib/python3.11/site-packages/django/core/management/__init__.py", line 442, in execute_from_command_line
+#16 0.963     utility.execute()
+#16 0.963   File "/opt/venv/lib/python3.11/site-packages/django/core/management/__init__.py", line 416, in execute
+#16 0.963     django.setup()
+#16 0.963   File "/opt/venv/lib/python3.11/site-packages/django/__init__.py", line 19, in setup
+#16 0.963     configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+#16 0.963   File "/opt/venv/lib/python3.11/site-packages/django/utils/log.py", line 76, in configure_logging
+#16 0.963     logging_config_func(logging_settings)
+#16 0.963   File "/usr/local/lib/python3.11/logging/config.py", line 823, in dictConfig
+#16 0.964     dictConfigClass(config).configure()
+#16 0.964   File "/usr/local/lib/python3.11/logging/config.py", line 555, in configure
+#16 0.964     raise ValueError('Unable to configure '
+#16 0.964 ValueError: Unable to configure formatter 'json'
+#16 ERROR: process "/bin/sh -c python manage.py collectstatic --noinput --settings=awranalyzor.settings.production" did not complete successfully: exit code: 1
+------
+ > [production 8/8] RUN python manage.py collectstatic --noinput --settings=awranalyzor.settings.production:
+0.963     django.setup()
+0.963   File "/opt/venv/lib/python3.11/site-packages/django/__init__.py", line 19, in setup
+0.963     configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+0.963   File "/opt/venv/lib/python3.11/site-packages/django/utils/log.py", line 76, in configure_logging
+0.963     logging_config_func(logging_settings)
+0.963   File "/usr/local/lib/python3.11/logging/config.py", line 823, in dictConfig
+0.964     dictConfigClass(config).configure()
+0.964   File "/usr/local/lib/python3.11/logging/config.py", line 555, in configure
+0.964     raise ValueError('Unable to configure '
+0.964 ValueError: Unable to configure formatter 'json'
+------
+Dockerfile:62
+--------------------
+  60 |     # 收集静态文件
+  61 |     ENV SECRET_KEY=build-time-secret-key-only-for-collectstatic
+  62 | >>> RUN python manage.py collectstatic --noinput --settings=awranalyzor.settings.production
+  63 |     
+  64 |     # 切换到非root用户
+--------------------
+ERROR: failed to solve: process "/bin/sh -c python manage.py collectstatic --noinput --settings=awranalyzor.settings.production" did not complete successfully: exit code: 1

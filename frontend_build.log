@@ -1,0 +1,91 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.22kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/nginx:1.24-alpine
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:18-alpine
+#3 DONE 15.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#5 DONE 0.0s
+
+#6 [production 1/7] FROM docker.io/library/nginx:1.24-alpine
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 2.56kB done
+#7 DONE 0.0s
+
+#8 [production 3/7] RUN apk add --no-cache curl
+#8 CACHED
+
+#9 [production 2/7] RUN addgroup -g 1001 -S awrapp &&     adduser -S awrapp -u 1001
+#9 CACHED
+
+#10 [production 4/7] COPY nginx.conf /etc/nginx/nginx.conf
+#10 CACHED
+
+#11 [builder 3/6] COPY package*.json ./
+#11 CACHED
+
+#12 [builder 4/6] RUN npm ci --only=production
+#12 CACHED
+
+#13 [builder 2/6] WORKDIR /app
+#13 CACHED
+
+#14 [production 5/7] COPY default.conf /etc/nginx/conf.d/default.conf
+#14 CACHED
+
+#15 [builder 5/6] COPY . .
+#15 CACHED
+
+#16 [builder 6/6] RUN npm run build
+#16 0.346 
+#16 0.346 > frontend@0.1.0 build
+#16 0.346 > react-scripts build
+#16 0.346 
+#16 2.106 Creating an optimized production build...
+#16 64.48 Failed to compile.
+#16 64.48 
+#16 64.48 TS2322: Type 'null' is not assignable to type 'string | undefined'.
+#16 64.48     82 |         platform: 'Linux x86-64',
+#16 64.48     83 |         rac_instances: null,
+#16 64.48   > 84 |         cdb_name: null,
+#16 64.48        |         ^^^^^^^^
+#16 64.48     85 |         pdb_name: null
+#16 64.48     86 |       },
+#16 64.48     87 |       snapshot_info: {
+#16 64.48 
+#16 64.48 
+#16 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+------
+ > [builder 6/6] RUN npm run build:
+64.48 TS2322: Type 'null' is not assignable to type 'string | undefined'.
+64.48     82 |         platform: 'Linux x86-64',
+64.48     83 |         rac_instances: null,
+64.48   > 84 |         cdb_name: null,
+64.48        |         ^^^^^^^^
+64.48     85 |         pdb_name: null
+64.48     86 |       },
+64.48     87 |       snapshot_info: {
+64.48 
+64.48 
+------
+Dockerfile:18
+--------------------
+  16 |     # 构建生产版本
+  17 |     ENV NODE_ENV=production
+  18 | >>> RUN npm run build
+  19 |     
+  20 |     # 生产镜像 - Nginx
+--------------------
+ERROR: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1

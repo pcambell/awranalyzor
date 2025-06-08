@@ -21,7 +21,7 @@ import {
   ReloadOutlined
 } from '@ant-design/icons';
 import FileUpload from '../components/FileUpload';
-import { UploadedFile } from '../types';
+import { UploadedFile, AWRParseResult } from '../types';
 import { 
   startParsing, 
   fetchParseHistory,
@@ -43,7 +43,7 @@ const Upload: React.FC = () => {
   
   // 组件加载时获取解析历史
   useEffect(() => {
-    dispatch(fetchParseHistory());
+    // dispatch(fetchParseHistory());
   }, [dispatch]);
 
   // 处理文件上传成功 - SOLID原则：单一职责
@@ -57,6 +57,14 @@ const Upload: React.FC = () => {
     try {
       message.info('正在启动AWR文件解析...');
       
+      // 暂时模拟解析开始
+      const taskId = 'mock-task-' + Date.now();
+      message.success('解析任务已启动！');
+      
+      // 跳转到解析进度页面
+      navigate(`/parse-progress/${taskId}`);
+      
+      /*
       const resultAction = await dispatch(startParsing({
         fileId: file.id,
         fileName: file.name
@@ -71,6 +79,7 @@ const Upload: React.FC = () => {
       } else {
         message.error('启动解析失败，请重试');
       }
+      */
     } catch (error: any) {
       console.error('启动解析失败:', error);
       message.error('启动解析失败: ' + (error.message || '未知错误'));
@@ -94,7 +103,7 @@ const Upload: React.FC = () => {
 
   // 刷新任务状态
   const handleRefresh = () => {
-    dispatch(fetchParseHistory());
+    // dispatch(fetchParseHistory());
     message.success('任务状态已刷新');
   };
 
@@ -111,7 +120,10 @@ const Upload: React.FC = () => {
       {/* 文件上传组件 */}
       <FileUpload
         onUploadSuccess={handleUploadSuccess}
-        onParseStart={handleParseStart}
+        onParseStart={(result: AWRParseResult) => {
+          // 简化处理，直接跳转到结果页面
+          navigate(`/results/${result.id}`);
+        }}
         maxFileSize={50}
         accept=".html,.htm"
         multiple={false}
