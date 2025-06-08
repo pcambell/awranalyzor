@@ -7,8 +7,8 @@ Django==4.2.16
 djangorestframework==3.14.0
 django-cors-headers==4.3.1
 
-# 数据库相关 (Windows兼容)
-psycopg2==2.9.9
+# 数据库相关 (Linux兼容)
+psycopg2-binary==2.9.7
 redis==5.0.1
 
 # 异步任务处理
@@ -17,8 +17,8 @@ django-celery-beat==2.5.0
 django-celery-results==2.5.0
 
 # HTML解析和数据处理
-beautifulsoup4==4.12.3
-lxml==5.1.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
 pandas==2.2.0
 numpy==1.26.4
 
@@ -28,7 +28,7 @@ openpyxl==3.1.2
 
 # 安全和验证
 django-extensions==3.2.3
-python-magic-bin==0.4.14
+python-magic==0.4.24
 
 # 开发和测试工具
 pytest==7.4.4

@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     gcc \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 创建Python虚拟环境
