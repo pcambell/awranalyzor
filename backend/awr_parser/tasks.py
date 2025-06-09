@@ -11,10 +11,9 @@ from django.utils import timezone
 from django.core.files.storage import default_storage
 
 from awr_upload.models import AWRReport
-from .services.awr_parsing_service import AWRParsingService
-from .services.oracle_19c_parser import Oracle19cParser
-from .services.oracle_11g_parser import Oracle11gParser
-from .exceptions import ParsingError, UnsupportedVersionError
+from awr_upload.services import AWRParsingService, AWRParsingError
+from .parsers.factory import create_parser, parse_awr
+from .parsers.base import ParseResult, OracleVersion
 
 logger = logging.getLogger(__name__)
 
@@ -90,22 +89,7 @@ def parse_awr_file(self, report_id: int) -> Dict[str, Any]:
             'message': 'AWR文件解析成功'
         }
         
-    except UnsupportedVersionError as e:
-        # 不支持的版本
-        awr_report.status = 'failed'
-        awr_report.error_message = f"不支持的Oracle版本: {str(e)}"
-        awr_report.updated_at = timezone.now()
-        awr_report.save(update_fields=['status', 'error_message', 'updated_at'])
-        
-        logger.error(f"不支持的Oracle版本 - 报告ID: {report_id}, 错误: {str(e)}")
-        
-        raise self.retry(
-            countdown=300,  # 5分钟后重试
-            max_retries=1,  # 最多重试1次
-            exc=e
-        )
-        
-    except ParsingError as e:
+    except AWRParsingError as e:
         # 解析错误
         awr_report.status = 'failed'
         awr_report.error_message = f"解析失败: {str(e)}"

@@ -2,6 +2,11 @@ import { useState, useCallback } from 'react';
 import { message } from 'antd';
 import { UploadedFile, AWRParseResult, ApiResponse } from '../types';
 
+/**
+ * {{CHENGQI: 修复前后端数据格式不匹配 - 2025-06-09 19:20:40 +08:00 - 
+ * Action: Modified; Reason: 修复前端期望ApiResponse包装格式与后端直接返回模型对象的不匹配; Principle_Applied: 数据适配和容错处理}}
+ */
+
 interface UploadConfig {
   maxFileSize?: number; // MB
   allowedTypes?: string[];
@@ -98,16 +103,31 @@ export const useFileUpload = (config: UploadConfig = {}): UseFileUploadReturn =>
         throw new Error(`上传失败: ${response.status} ${response.statusText}`);
       }
 
-      const result: ApiResponse<UploadedFile> = await response.json();
+      const result = await response.json();
       
-      if (!result.success || !result.data) {
-        throw new Error(result.message || '上传处理失败');
+      // 后端直接返回AWR报告对象，不是包装的ApiResponse格式
+      // 检查是否包含必要的字段来判断是否成功
+      if (!result.id || typeof result.id !== 'number') {
+        throw new Error(result.error || result.message || '上传处理失败');
       }
 
       setProgress(100);
       message.success(`文件 "${file.name}" 上传成功！`);
       
-      return result.data;
+      // 转换后端返回格式到前端期望的UploadedFile格式
+      const uploadedFile: UploadedFile = {
+        id: result.id.toString(),
+        name: result.original_filename || file.name,
+        size: result.file_size || file.size,
+        upload_time: result.created_at || new Date().toISOString(),
+        status: result.status === 'completed' ? 'completed' : 
+                result.status === 'failed' ? 'failed' :
+                result.status === 'processing' ? 'processing' : 'uploaded',
+        file_path: result.file_path,
+        error_message: result.error_message
+      };
+      
+      return uploadedFile;
 
     } catch (err: any) {
       const errorMessage = err.message || '上传失败';

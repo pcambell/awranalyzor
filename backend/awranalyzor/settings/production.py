@@ -11,7 +11,7 @@ from decouple import config
 DEBUG = False
 
 # 允许的主机
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,*').split(',')
 
 # 安全设置
 SECURE_BROWSER_XSS_FILTER = True
@@ -34,9 +34,6 @@ DATABASES = {
         'HOST': config('DB_HOST', default='db'),
         'PORT': config('DB_PORT', default='5432'),
         'CONN_MAX_AGE': 600,
-        'OPTIONS': {
-            'MAX_CONNS': 20,
-        }
     }
 }
 

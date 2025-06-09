@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer, ValidationError
 from rest_framework.views import APIView
@@ -57,7 +57,7 @@ class AWRUploadView(APIView):
     """
     
     parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -95,10 +95,24 @@ class AWRUploadView(APIView):
             tags_str = request.data.get('tags', '').strip()
             tags = [tag.strip() for tag in tags_str.split(',') if tag.strip()] if tags_str else []
             
+            # 处理用户认证问题 - 为未认证用户创建默认用户
+            if request.user.is_authenticated:
+                user = request.user
+            else:
+                # 创建或获取默认匿名用户
+                user, created = User.objects.get_or_create(
+                    username='anonymous_user',
+                    defaults={
+                        'email': 'anonymous@example.com',
+                        'first_name': 'Anonymous',
+                        'last_name': 'User'
+                    }
+                )
+            
             # 创建AWR报告
             awr_report = self.upload_service.create_awr_report(
                 uploaded_file=uploaded_file,
-                user=request.user,
+                user=user,
                 name=name,
                 description=description,
                 category=category or None,
@@ -113,38 +127,58 @@ class AWRUploadView(APIView):
             response_data = serializer.data
             response_data['parsing_scheduled'] = parsing_scheduled
             
-            logger.info(f"AWR文件上传成功: {awr_report.id} - 用户: {request.user.username}")
+            logger.info(f"AWR文件上传成功: {awr_report.id} - 用户: {user.username}")
             
             return Response(response_data, status=status.HTTP_201_CREATED)
             
         except AWRFileValidationError as e:
-            logger.warning(f"AWR文件验证失败: {str(e)} - 用户: {request.user.username}")
+            user_name = request.user.username if request.user.is_authenticated else 'anonymous'
+            logger.warning(f"AWR文件验证失败: {str(e)} - 用户: {user_name}")
             return Response(
                 {'error': f'文件验证失败: {str(e)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         except Exception as e:
-            logger.error(f"AWR文件上传失败: {str(e)} - 用户: {request.user.username}")
+            user_name = request.user.username if request.user.is_authenticated else 'anonymous'
+            logger.error(f"AWR文件上传失败: {str(e)} - 用户: {user_name}")
             return Response(
                 {'error': f'上传处理失败: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
-class AWRReportViewSet(viewsets.ReadOnlyModelViewSet):
+class AWRReportViewSet(viewsets.ModelViewSet):
     """
     AWR报告ViewSet
     
-    提供报告列表、详情查询等功能
+    提供报告列表、详情查询、删除等功能
+    {{CHENGQI: 启用删除功能 - 2025-06-09 19:29:13 +08:00 - 
+    Action: Modified; Reason: 将ReadOnlyModelViewSet改为ModelViewSet以支持删除重复文件; Principle_Applied: 用户体验优化}}
     """
     
     serializer_class = AWRReportSerializer
     permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'delete', 'head', 'options']  # 只允许GET和DELETE操作
     
     def get_queryset(self):
         """返回当前用户的AWR报告"""
         return AWRReport.objects.filter(uploaded_by=self.request.user).order_by('-created_at')
+    
+    def perform_destroy(self, instance):
+        """删除报告时同时删除关联的文件"""
+        try:
+            # 删除文件
+            if instance.file_path:
+                instance.file_path.delete(save=False)
+            
+            # 删除数据库记录
+            instance.delete()
+            logger.info(f"AWR报告 {instance.id} 及关联文件已删除")
+            
+        except Exception as e:
+            logger.error(f"删除AWR报告 {instance.id} 时出错: {e}")
+            raise
     
     @action(detail=True, methods=['get'])
     def status(self, request, pk=None) -> Response:

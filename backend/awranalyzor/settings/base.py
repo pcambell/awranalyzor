@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_extensions',
+    'django_celery_beat',
     
     # AWR Analyzer apps
     'accounts',         # 用户管理

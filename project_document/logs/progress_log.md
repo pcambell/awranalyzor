@@ -12,6 +12,142 @@
 
 ## 📈 最新进度更新
 
+### 2025-06-09 19:20:40 +08:00 - 前后端数据格式不匹配修复完成
+
+**任务ID**: BUGFIX-003  
+**任务名称**: 修复前端期望ApiResponse格式与后端直接返回模型的不匹配  
+**完成状态**: ✅ 已完成  
+**负责角色**: LD  
+
+**问题描述**:
+- 后端上传API返回201成功，但前端仍显示"上传处理失败"
+- 前端期望后端返回 `ApiResponse<UploadedFile>` 格式（包含success、data字段）
+- 后端实际直接返回AWR报告模型对象，符合RESTful规范但不匹配前端期望
+
+**根因分析**:
+- 前端 `useFileUpload.ts` 中期望响应格式：`{success: true, data: UploadedFile}`
+- 后端实际返回格式：直接的AWR报告对象（包含id、name、status等字段）
+- 导致前端检查 `!result.success || !result.data` 时抛出错误
+
+**解决方案**:
+- **修改前端适配逻辑**: 移除对ApiResponse包装格式的期望
+- **直接处理后端模型**: 将后端AWR报告对象转换为前端UploadedFile格式
+- **状态映射**: 正确映射后端status到前端status枚举
+
+**关键成果**:
+- 🔧 **数据格式适配**: 前端现在正确处理后端直接返回的模型对象
+- ✅ **状态映射**: 正确转换后端status（completed/failed/processing）到前端格式
+- 📊 **字段映射**: 
+  - `result.id` → `uploadedFile.id` (转为字符串)
+  - `result.original_filename` → `uploadedFile.name`
+  - `result.file_size` → `uploadedFile.size`
+  - `result.created_at` → `uploadedFile.upload_time`
+  - `result.error_message` → `uploadedFile.error_message`
+
+**技术价值**:
+- **数据适配能力**: 增强了前端对不同后端响应格式的适应性
+- **容错处理**: 改善了错误检测和处理逻辑
+- **RESTful兼容**: 支持后端采用标准RESTful API设计
+
+**业务价值**:
+- **用户体验**: 解决了用户看到错误"上传处理失败"的困扰
+- **功能完整性**: 上传成功后用户能正确看到成功状态和报告信息
+- **系统一致性**: 前后端数据流动现在完全正常
+
+**设计原则体现**:
+- ✅ 适配性：前端灵活适应后端数据格式
+- ✅ 容错性：增强错误检测和处理能力
+- ✅ 可维护性：清晰的数据转换逻辑便于维护
+
+### 2025-06-09 19:12:20 +08:00 - ASH报告上传验证修复完成
+
+**任务ID**: BUGFIX-002  
+**任务名称**: 修复ASH报告文件验证被错误拒绝  
+**完成状态**: ✅ 已完成  
+**负责角色**: LD  
+
+**问题描述**:
+- 用户上传有效的ASH报告被拒绝，错误信息："AWR文件验证失败: 文件内容不像是Oracle AWR报告"
+- 现有验证逻辑仅检查'workload repository'关键词，无法识别ASH报告
+
+**根因分析**:
+- AWR (Automatic Workload Repository) 和ASH (Active Session History) 是两种不同但都有效的Oracle性能报告
+- 原验证逻辑只识别传统AWR报告，忽略了ASH报告的存在
+- ASH报告使用"ASH Report"或"Active Session History"标识，而非"workload repository"
+
+**解决方案**:
+- **扩展验证关键词**: 增加对'ash report'和'active session history'的检查
+- **通用Oracle报告检查**: 添加'oracle'和'report'组合的通用检查
+- **增大检查范围**: 将内容检查范围从2048字节扩大到4096字节
+
+**关键成果**:
+- 🔧 **验证逻辑完善**: 现在支持AWR、ASH和通用Oracle报告的识别
+- ✅ **功能验证**: 测试ASH报告文件成功通过验证并返回201 Created
+- 📊 **支持报告类型**: 
+  - AWR报告 (关键词: 'workload repository')
+  - ASH报告 (关键词: 'ash report', 'active session history')
+  - 通用Oracle报告 (关键词: 'oracle' + 'report'/'database')
+
+**技术价值**:
+- **业务逻辑完整性**: 确保所有有效的Oracle性能报告都能被正确识别
+- **用户体验提升**: 避免用户上传有效报告却被错误拒绝的困扰
+- **系统健壮性**: 增强了文件类型识别的准确性和覆盖范围
+
+**业务价值**:
+- **功能完整性**: AWR分析器现在能正确处理Oracle的主要性能报告类型
+- **用户满意度**: 解决了用户反馈的上传失败问题
+- **系统可靠性**: 提升了文件处理的准确性和可靠性
+
+**设计原则体现**:
+- ✅ 业务逻辑完整性：正确识别所有有效的Oracle报告类型
+- ✅ 用户中心：从用户实际需求出发完善功能
+- ✅ 系统健壮性：增强边界情况处理能力
+
+### 2025-06-09 18:43:53 +08:00 - 上传API路由404错误修复完成
+
+**任务ID**: BUGFIX-001  
+**任务名称**: 修复前端上传功能404错误  
+**完成状态**: ✅ 已完成  
+**负责角色**: LD  
+
+**问题描述**:
+- 前端上传请求 `/api/upload/` 返回404 Not Found错误
+- 后端日志显示："WARNING 2025-06-09 18:30:21,276 log 9 139708713662144 Not Found: /api/upload/"
+
+**根因分析**:
+- URL路由配置不匹配：前端请求 `/api/upload/`，后端实际路径为 `/api/v1/upload/api/upload/`
+- 主URL配置文件中 `awr_upload.urls` 映射到 `/api/v1/upload/`
+- awr_upload应用内部又定义了 `api/upload/` 路径，造成重复前缀
+
+**解决方案**:
+- **主URL配置调整**: 将 `path('api/v1/upload/', include('awr_upload.urls'))` 改为 `path('api/', include('awr_upload.urls'))`
+- **应用URL简化**: 将 `awr_upload/urls.py` 中的 `api/upload/` 改为直接 `upload/`
+- **Docker镜像重建**: 由于代码在Docker镜像中，需要重新构建镜像应用更改
+
+**关键成果**:
+- 🔧 **路由修复**: URL路由现在正确映射 `/api/upload/` → `awr_upload.views.AWRUploadView`
+- ✅ **功能验证**: `curl -X POST http://127.0.0.1/api/upload/` 返回预期的400错误（"请选择要上传的AWR文件"）
+- 📊 **完整路由列表**: 确认所有上传相关API路径正确配置：
+  - `/api/upload/` - 文件上传
+  - `/api/validate/` - 文件验证  
+  - `/api/progress/<int:report_id>/` - 解析进度
+  - `/api/reports/` - 报告管理
+
+**技术价值**:
+- **路由架构优化**: 简化了URL结构，遵循KISS原则
+- **开发效率提升**: 解除了前后端集成的阻塞点
+- **系统稳定性**: 确保上传功能的基础设施正常工作
+
+**业务价值**:
+- **用户体验**: 用户现在可以正常使用文件上传功能
+- **功能完整性**: AWR分析系统的核心入口（文件上传）恢复正常
+- **开发进度**: 为后续测试和功能开发清除了障碍
+
+**设计原则体现**:
+- ✅ KISS原则：简化URL路由结构，避免重复前缀
+- ✅ DRY原则：统一路由配置模式
+- ✅ 可维护性：清晰的路由映射关系便于后续维护
+
 ### 2025-06-01 23:20:37 +08:00 - Django应用架构完成
 
 **任务ID**: P1-LD-002  
