@@ -70,13 +70,71 @@ class AWRUploadService:
         
         # 基础内容检查
         try:
-            # 读取文件开头进行基础验证
+            # 读取文件开头进行基础验证 - 增加读取量和编码兼容性
             uploaded_file.seek(0)
-            content_sample = uploaded_file.read(2048).decode('utf-8', errors='ignore')
+            
+            # 尝试多种编码方式
+            content_sample = None
+            encodings = ['utf-8', 'utf-8-sig', 'latin-1', 'cp1252', 'iso-8859-1']
+            
+            for encoding in encodings:
+                try:
+                    uploaded_file.seek(0)
+                    raw_content = uploaded_file.read(16384)  # 增加到16KB
+                    content_sample = raw_content.decode(encoding, errors='ignore')
+                    break
+                except Exception:
+                    continue
+            
+            if content_sample is None:
+                # 最后兜底方案
+                uploaded_file.seek(0)
+                content_sample = uploaded_file.read(16384).decode('utf-8', errors='replace')
+            
             uploaded_file.seek(0)  # 重置文件指针
             
-            if 'workload repository' not in content_sample.lower():
-                errors.append("文件内容不像是Oracle AWR报告")
+            # 检查是否为Oracle AWR或ASH报告 - 扩展检测逻辑
+            content_lower = content_sample.lower()
+            
+            # AWR报告检测
+            is_awr_report = (
+                'workload repository' in content_lower or
+                'awr report' in content_lower or
+                ('automatic workload repository' in content_lower)
+            )
+            
+            # ASH报告检测
+            is_ash_report = (
+                'ash report' in content_lower or
+                'active session history' in content_lower or
+                ('ash report for' in content_lower)
+            )
+            
+            # 通用Oracle报告检测
+            is_oracle_report = (
+                'oracle' in content_lower and (
+                    'report' in content_lower or 
+                    'database' in content_lower or
+                    'instance' in content_lower
+                )
+            )
+            
+            # 进一步的Oracle特征检测
+            oracle_features = (
+                'db name' in content_lower or
+                'db id' in content_lower or
+                'instance name' in content_lower or
+                'host name' in content_lower or
+                'snap id' in content_lower or
+                'begin snap' in content_lower or
+                'end snap' in content_lower or
+                'oracle database' in content_lower
+            )
+            
+            logger.debug(f"文件验证检测结果 - AWR: {is_awr_report}, ASH: {is_ash_report}, Oracle通用: {is_oracle_report}, Oracle特征: {oracle_features}")
+            
+            if not (is_awr_report or is_ash_report or is_oracle_report or oracle_features):
+                errors.append("文件内容不像是Oracle AWR/ASH报告")
                 
         except Exception as e:
             errors.append(f"读取文件内容时出错: {str(e)}")

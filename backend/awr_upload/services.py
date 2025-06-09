@@ -137,6 +137,16 @@ class AWRUploadService:
             
             logger.debug(f"文件验证检测结果 - AWR: {is_awr_report}, ASH: {is_ash_report}, Oracle通用: {is_oracle_report}, Oracle特征: {oracle_features}")
             
+            # 临时调试输出
+            print(f"[DEBUG] 文件验证检测结果:")
+            print(f"[DEBUG]   AWR报告: {is_awr_report}")
+            print(f"[DEBUG]   ASH报告: {is_ash_report}")
+            print(f"[DEBUG]   Oracle通用: {is_oracle_report}")
+            print(f"[DEBUG]   Oracle特征: {oracle_features}")
+            print(f"[DEBUG]   总体通过: {is_awr_report or is_ash_report or is_oracle_report or oracle_features}")
+            print(f"[DEBUG]   content_sample长度: {len(content_sample)}")
+            print(f"[DEBUG]   content_sample前200字符: {content_sample[:200]}")
+            
             if not (is_awr_report or is_ash_report or is_oracle_report or oracle_features):
                 errors.append("文件内容不像是Oracle AWR/ASH报告")
                 
