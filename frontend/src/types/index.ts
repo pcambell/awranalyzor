@@ -28,8 +28,16 @@ export interface UploadedFile {
 // ReportDisplay组件使用的新AWR解析结果类型
 export interface AWRParseResult {
   id: string;
+  file_id: string;
   report_id?: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  start_time: string;
+  estimated_time_remaining: number | null;
+  parser_version: string;
+  sections_parsed: number;
+  total_sections: number;
+  parse_errors: any[];
   data_completeness?: number;
   data_quality_score?: number;
   error_message?: string | null;

@@ -149,18 +149,35 @@ class VersionDetector:
         Returns:
             bool: 如果是ASH报告返回True
         """
-        # ASH报告的特征标识
-        ash_indicators = [
-            r'ASH\s+Report',
-            r'<title[^>]*>ASH\s+Report',
-            r'<h1[^>]*>ASH\s+Report',
-            r'Active\s+Session\s+History\s+Report',
-            r'DBA_HIST_ACTIVE_SESS_HISTORY',
-            r'V\$ACTIVE_SESSION_HISTORY'
+        # {{CHENGQI: 修复ASH报告误判 - 2025-06-09 20:04:47 +08:00 - 
+        # Action: Modified; Reason: 现代AWR报告包含ASH部分是正常的，需要精确区分纯ASH报告和包含ASH的AWR报告; Principle_Applied: 业务逻辑正确性}}
+        
+        # 首先检查是否是AWR报告（包含ASH部分的AWR是正常的）
+        awr_strong_indicators = [
+            r'<title[^>]*>AWR\s+Report',
+            r'AWR\s+Report\s+for\s+DB',
+            r'<h1[^>]*>AWR\s+Report',
+            r'Automatic\s+Workload\s+Repository',
+            r'Database\s+Summary',
+            r'Load\s+Profile',
+            r'Instance\s+Activity\s+Stats',
+            r'Tablespace\s+IO\s+Stats'
         ]
         
-        # 检查是否包含ASH特征
-        for pattern in ash_indicators:
+        # 如果包含强AWR特征，即使有ASH部分也是AWR报告
+        for pattern in awr_strong_indicators:
+            if re.search(pattern, html_content, re.IGNORECASE):
+                return False  # 这是AWR报告，不是ASH报告
+        
+        # 纯ASH报告的特征标识（标题中明确为ASH且不包含AWR特征）
+        ash_title_indicators = [
+            r'<title[^>]*>ASH\s+Report[^<]*</title>',
+            r'<h1[^>]*>ASH\s+Report</h1>',
+            r'<title[^>]*>Active\s+Session\s+History\s+Report[^<]*</title>'
+        ]
+        
+        # 检查是否是纯ASH报告
+        for pattern in ash_title_indicators:
             if re.search(pattern, html_content, re.IGNORECASE):
                 return True
         

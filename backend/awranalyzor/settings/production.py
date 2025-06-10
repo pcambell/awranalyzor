@@ -66,6 +66,16 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_DISABLE_RATE_LIMITS = False
 
 # 日志配置
+# 在Docker环境中使用/app路径，本地开发使用相对路径
+if os.path.exists('/app'):
+    LOG_DIR = '/app/logs'
+    STATIC_ROOT = '/app/staticfiles'
+    MEDIA_ROOT = '/app/media'
+else:
+    LOG_DIR = os.path.join(BASE_DIR.parent.parent, 'logs')
+    STATIC_ROOT = os.path.join(BASE_DIR.parent.parent, 'staticfiles')
+    MEDIA_ROOT = os.path.join(BASE_DIR.parent.parent, 'media')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -83,7 +93,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/app/logs/awranalyzor.log',
+            'filename': os.path.join(LOG_DIR, 'awranalyzor.log'),
             'maxBytes': 1024*1024*15,  # 15MB
             'backupCount': 10,
             'formatter': 'verbose',
@@ -118,8 +128,7 @@ LOGGING = {
 }
 
 # 静态文件配置
-STATIC_ROOT = '/app/staticfiles'
-MEDIA_ROOT = '/app/media'
+# STATIC_ROOT 和 MEDIA_ROOT 已在上面根据环境设置
 
 # 邮件配置（可选）
 if config('EMAIL_HOST', default=None):
@@ -133,20 +142,24 @@ if config('EMAIL_HOST', default=None):
 # 错误监控（Sentry）
 SENTRY_DSN = config('SENTRY_DSN', default=None)
 if SENTRY_DSN:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.celery import CeleryIntegration
-    
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(auto_enabling=True),
-            CeleryIntegration(monitor_beat_tasks=True),
-        ],
-        traces_sample_rate=0.1,
-        send_default_pii=True,
-        environment='production'
-    )
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+        from sentry_sdk.integrations.celery import CeleryIntegration
+        
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[
+                DjangoIntegration(auto_enabling=True),
+                CeleryIntegration(monitor_beat_tasks=True),
+            ],
+            traces_sample_rate=0.1,
+            send_default_pii=True,
+            environment='production'
+        )
+    except ImportError:
+        # Sentry SDK 不可用时跳过
+        pass
 
 # 健康检查
 HEALTH_CHECK = {

@@ -69,8 +69,16 @@ const Results: React.FC = () => {
   const generateMockData = (): AWRParseResult => {
     return {
       id: 'mock-result-1',
+      file_id: 'mock-file-1',
       report_id: 'mock-report-1',
       status: 'completed',
+      progress: 100,
+      start_time: '2025-06-10T09:30:00+08:00',
+      estimated_time_remaining: null,
+      parser_version: '1.0.0',
+      sections_parsed: 5,
+      total_sections: 5,
+      parse_errors: [],
       data_completeness: 95.5,
       data_quality_score: 88,
       error_message: null,

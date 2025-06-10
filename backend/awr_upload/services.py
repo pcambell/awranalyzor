@@ -222,9 +222,20 @@ class AWRUploadService:
             try:
                 snapshot_info = parser.parse_snapshot_info(soup)
                 if snapshot_info:
+                    from django.utils import timezone as django_timezone
+                    
+                    # 确保时间带有时区信息
+                    begin_time = snapshot_info.begin_time
+                    end_time = snapshot_info.end_time
+                    
+                    if begin_time and django_timezone.is_naive(begin_time):
+                        begin_time = django_timezone.make_aware(begin_time)
+                    if end_time and django_timezone.is_naive(end_time):
+                        end_time = django_timezone.make_aware(end_time)
+                    
                     info.update({
-                        'snapshot_begin_time': snapshot_info.begin_time,
-                        'snapshot_end_time': snapshot_info.end_time,
+                        'snapshot_begin_time': begin_time,
+                        'snapshot_end_time': end_time,
                         'snapshot_duration_minutes': snapshot_info.elapsed_time_minutes,
                     })
             except Exception as e:
@@ -411,9 +422,22 @@ class AWRParsingService:
                 report.instance_name = result.db_info.instance_name
                 report.database_id = result.db_info.db_name
             
+            # {{CHENGQI: 修复时区警告 - 2025-06-09 20:04:47 +08:00 - 
+            # Action: Modified; Reason: 确保时间戳包含时区信息，消除Django的时区警告; Principle_Applied: 数据一致性}}
             if result.snapshot_info:
-                report.snapshot_begin_time = result.snapshot_info.begin_time
-                report.snapshot_end_time = result.snapshot_info.end_time
+                from django.utils import timezone as django_timezone
+                
+                # 如果时间是naive datetime，转换为aware datetime
+                begin_time = result.snapshot_info.begin_time
+                end_time = result.snapshot_info.end_time
+                
+                if begin_time and django_timezone.is_naive(begin_time):
+                    begin_time = django_timezone.make_aware(begin_time)
+                if end_time and django_timezone.is_naive(end_time):
+                    end_time = django_timezone.make_aware(end_time)
+                
+                report.snapshot_begin_time = begin_time
+                report.snapshot_end_time = end_time
                 report.snapshot_duration_minutes = result.snapshot_info.elapsed_time_minutes
             
             report.status = 'parsed'

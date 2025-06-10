@@ -67,13 +67,9 @@ export const deleteFile = async (fileId: string) => {
   return response.data;
 };
 
-// 启动AWR解析
-export const startAWRParse = async (fileId: string) => {
-  const response = await api.post('/parse/', {
-    file_id: fileId,
-  });
-  return response.data;
-};
+// {{CHENGQI: 移除废弃的parse接口调用 - 2025-06-10 10:05:00 +08:00 - 
+// Action: Removed; Reason: 后端上传成功后自动开始解析，不需要额外的parse接口; Principle_Applied: YAGNI-移除不必要的功能}}
+// 注意：此函数已被移除，上传成功后后端会自动开始解析
 
 // 获取解析状态
 export const getParseStatus = async (parseId: string) => {

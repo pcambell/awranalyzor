@@ -119,10 +119,24 @@ class AWRUploadView(APIView):
             
         except AWRFileValidationError as e:
             logger.warning(f"AWR文件验证失败: {str(e)} - 用户: {request.user.username}")
-            return Response(
-                {'error': f'文件验证失败: {str(e)}'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            
+            # {{CHENGQI: 改进重复文件错误信息 - 2025-06-09 20:04:47 +08:00 - 
+            # Action: Modified; Reason: 提供更清晰的文件重复错误信息，提升用户体验; Principle_Applied: 用户体验优化}}
+            error_msg = str(e)
+            if "文件已存在" in error_msg:
+                return Response(
+                    {
+                        'error': f'文件重复上传: {error_msg}',
+                        'error_type': 'duplicate_file',
+                        'message': '该文件已经上传过，请检查文件是否重复或选择其他文件'
+                    },
+                    status=status.HTTP_409_CONFLICT  # 使用409状态码表示冲突
+                )
+            else:
+                return Response(
+                    {'error': f'文件验证失败: {error_msg}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         except Exception as e:
             logger.error(f"AWR文件上传失败: {str(e)} - 用户: {request.user.username}")

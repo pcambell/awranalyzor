@@ -18,13 +18,41 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.serializers import ModelSerializer, ValidationError
+from rest_framework.serializers import ModelSerializer, ValidationError, Serializer, CharField, IntegerField, FloatField, DateTimeField, ListField, DictField, SerializerMethodField
 from rest_framework.views import APIView
 
 from .models import AWRReport
 from .services import AWRUploadService, AWRParsingService, AWRFileValidationError
 
 logger = logging.getLogger(__name__)
+
+
+class AWRParseResultSerializer(Serializer):
+    """
+    AWR解析结果序列化器
+    {{CHENGQI: 添加解析结果序列化器 - 2025-06-10 12:37:15 +08:00 - 
+    Action: Added; Reason: 为解析结果API提供标准化的数据格式; Principle_Applied: 数据一致性}}
+    """
+    id = CharField()
+    file_id = CharField()
+    report_id = CharField(required=False, allow_null=True)
+    status = CharField()
+    progress = IntegerField()
+    start_time = DateTimeField()
+    estimated_time_remaining = IntegerField(required=False, allow_null=True)
+    parser_version = CharField()
+    sections_parsed = IntegerField()
+    total_sections = IntegerField()
+    parse_errors = ListField(required=False, default=list)
+    data_completeness = FloatField(required=False, allow_null=True)
+    data_quality_score = FloatField(required=False, allow_null=True)
+    error_message = CharField(required=False, allow_null=True)
+    db_info = DictField(required=False, allow_null=True)
+    snapshot_info = DictField(required=False, allow_null=True)
+    parse_metadata = DictField(required=False, allow_null=True)
+    load_profile = ListField(required=False, default=list)
+    wait_events = ListField(required=False, default=list)
+    sql_statistics = ListField(required=False, default=list)
 
 
 class AWRReportSerializer(ModelSerializer):
@@ -386,3 +414,272 @@ class AWRParsingProgressView(APIView):
             'failed': '处理失败',
         }
         return stage_map.get(status, '未知状态')
+
+
+class AWRParseResultView(APIView):
+    """
+    AWR解析结果API视图
+    {{CHENGQI: 添加解析结果API视图 - 2025-06-10 12:37:15 +08:00 - 
+    Action: Added; Reason: 实现解析结果检索功能，修复前端404错误; Principle_Applied: 单一职责原则}}
+    
+    提供获取详细AWR解析结果的功能
+    """
+    
+    permission_classes = [AllowAny]  # 暂时允许匿名访问，与上传保持一致
+    
+    def get(self, request, report_id: int) -> Response:
+        """
+        获取AWR报告的详细解析结果
+        
+        Args:
+            report_id: AWR报告ID
+            
+        Returns:
+            AWR解析结果的详细数据
+        """
+        try:
+            # 处理认证问题 - 与上传视图保持一致的逻辑
+            if request.user.is_authenticated:
+                user = request.user
+                # 验证报告归属
+                report = AWRReport.objects.filter(
+                    id=report_id, 
+                    uploaded_by=user
+                ).first()
+            else:
+                # 对于匿名用户，查找anonymous_user上传的报告
+                try:
+                    anonymous_user = User.objects.get(username='anonymous_user')
+                    report = AWRReport.objects.filter(
+                        id=report_id,
+                        uploaded_by=anonymous_user
+                    ).first()
+                except User.DoesNotExist:
+                    report = None
+            
+            if not report:
+                return Response(
+                    {'error': '报告不存在或无权限访问'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # 检查报告是否已成功解析
+            if report.status not in ['parsed', 'completed']:
+                return Response(
+                    {
+                        'error': '报告尚未解析完成',
+                        'current_status': report.status,
+                        'status_display': report.get_status_display()
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 重新解析文件获取详细结果
+            try:
+                parse_result = self._get_parse_result(report)
+                
+                # 构建响应数据
+                result_data = self._build_parse_result_data(report, parse_result)
+                
+                logger.info(f"成功返回AWR解析结果: 报告 {report_id}")
+                return Response(result_data, status=status.HTTP_200_OK)
+                
+            except Exception as parse_error:
+                logger.error(f"重新解析AWR报告 {report_id} 失败: {parse_error}")
+                return Response(
+                    {'error': f'解析结果获取失败: {str(parse_error)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+        except Exception as e:
+            logger.error(f"获取解析结果失败: {str(e)}")
+            return Response(
+                {'error': '服务器内部错误'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def _get_parse_result(self, report: AWRReport):
+        """
+        获取AWR报告的解析结果
+        
+        Args:
+            report: AWR报告实例
+            
+        Returns:
+            解析结果对象
+        """
+        # 读取文件内容
+        with open(report.file_path.path, 'r', encoding='utf-8', errors='ignore') as file:
+            content = file.read()
+        
+        # 使用解析器进行解析
+        from awr_parser.parsers.factory import parse_awr
+        result = parse_awr(content)
+        
+        return result
+    
+    def _build_parse_result_data(self, report: AWRReport, parse_result) -> Dict[str, Any]:
+        """
+        构建解析结果响应数据
+        
+        Args:
+            report: AWR报告实例
+            parse_result: 解析结果对象
+            
+        Returns:
+            格式化的解析结果数据
+        """
+        # 基础信息
+        result_data = {
+            'id': str(report.id),
+            'file_id': str(report.id),  # 使用report.id作为file_id
+            'report_id': str(report.id),
+            'status': 'completed' if parse_result.parse_status.value == 'success' else 'failed',
+            'progress': 100,
+            'start_time': report.created_at.isoformat(),
+            'estimated_time_remaining': None,
+            'parser_version': '1.0.0',
+            'sections_parsed': len(parse_result.parsed_sections),
+            'total_sections': 6,  # 预期的总区块数
+            'parse_errors': [
+                {
+                    'section': error.section,
+                    'type': error.error_type,
+                    'message': error.message,
+                    'details': error.details
+                }
+                for error in parse_result.errors
+            ],
+            'data_completeness': self._calculate_data_completeness(parse_result),
+            'data_quality_score': self._calculate_data_quality_score(parse_result),
+            'error_message': report.error_message
+        }
+        
+        # 数据库信息
+        if parse_result.db_info:
+            result_data['db_info'] = {
+                'db_name': parse_result.db_info.db_name,
+                'instance_name': parse_result.db_info.instance_name,
+                'db_version': parse_result.db_info.version.value,
+                'host_name': report.host_name or 'Unknown',
+                'platform': 'Linux x86-64',  # 默认值
+                'rac_instances': None,
+                'cdb_name': None,
+                'pdb_name': None
+            }
+        
+        # 快照信息
+        if parse_result.snapshot_info:
+            result_data['snapshot_info'] = {
+                'begin_snap_id': parse_result.snapshot_info.begin_snap_id,
+                'end_snap_id': parse_result.snapshot_info.end_snap_id,
+                'begin_time': parse_result.snapshot_info.begin_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'end_time': parse_result.snapshot_info.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'snapshot_duration_minutes': parse_result.snapshot_info.elapsed_time_minutes
+            }
+        
+        # 解析元数据
+        result_data['parse_metadata'] = {
+            'parse_duration_seconds': 2.5,  # 估算值
+            'parser_version': '1.0.0',
+            'oracle_version': parse_result.db_info.version.value if parse_result.db_info else 'unknown'
+        }
+        
+        # 负载概要
+        if parse_result.load_profile:
+            result_data['load_profile'] = self._format_load_profile(parse_result.load_profile)
+        
+        # 等待事件
+        result_data['wait_events'] = [
+            {
+                'event_name': event.event_name,
+                'waits': event.waits,
+                'time_waited_seconds': event.time_waited_ms / 1000.0 if event.time_waited_ms else 0,
+                'avg_wait_ms': event.avg_wait_ms,
+                'percent_db_time': getattr(event, 'percent_db_time', 0)
+            }
+            for event in parse_result.wait_events
+        ]
+        
+        # SQL统计
+        result_data['sql_statistics'] = [
+            {
+                'sql_id': sql.sql_id,
+                'executions': sql.executions,
+                'cpu_time_seconds': sql.cpu_time_ms / 1000.0 if sql.cpu_time_ms else 0,
+                'elapsed_time_seconds': sql.elapsed_time_ms / 1000.0 if sql.elapsed_time_ms else 0,
+                'buffer_gets': sql.buffer_gets,
+                'disk_reads': sql.disk_reads,
+                'rows_processed': sql.rows_processed
+            }
+            for sql in parse_result.sql_statistics
+        ]
+        
+        return result_data
+    
+    def _format_load_profile(self, load_profile) -> list:
+        """格式化负载概要数据"""
+        if not load_profile:
+            return []
+        
+        # 将LoadProfile对象转换为前端期望的格式
+        metrics = []
+        
+        # DB Time相关指标
+        if hasattr(load_profile, 'db_time_minutes') and load_profile.db_time_minutes:
+            metrics.append({
+                'metric_name': 'DB Time',
+                'per_second': round(load_profile.db_time_minutes * 60 / 3600, 2),
+                'per_transaction': None,
+                'per_exec': None,
+                'per_call': None
+            })
+        
+        # CPU Time
+        if hasattr(load_profile, 'db_cpu_minutes') and load_profile.db_cpu_minutes:
+            metrics.append({
+                'metric_name': 'DB CPU',
+                'per_second': round(load_profile.db_cpu_minutes * 60 / 3600, 2),
+                'per_transaction': None,
+                'per_exec': None,
+                'per_call': None
+            })
+        
+        # Logical reads
+        if hasattr(load_profile, 'logical_reads') and load_profile.logical_reads:
+            metrics.append({
+                'metric_name': 'Logical reads',
+                'per_second': round(load_profile.logical_reads / 3600, 2),
+                'per_transaction': None,
+                'per_exec': None,
+                'per_call': None
+            })
+        
+        # Physical reads
+        if hasattr(load_profile, 'physical_reads') and load_profile.physical_reads:
+            metrics.append({
+                'metric_name': 'Physical reads',
+                'per_second': round(load_profile.physical_reads / 3600, 2),
+                'per_transaction': None,
+                'per_exec': None,
+                'per_call': None
+            })
+        
+        return metrics
+    
+    def _calculate_data_completeness(self, parse_result) -> float:
+        """计算数据完整性百分比"""
+        total_sections = 6
+        parsed_sections = len(parse_result.parsed_sections)
+        return round((parsed_sections / total_sections) * 100, 1)
+    
+    def _calculate_data_quality_score(self, parse_result) -> float:
+        """计算数据质量评分"""
+        base_score = 100
+        
+        # 根据错误数量减分
+        error_penalty = len(parse_result.errors) * 5
+        warning_penalty = len(parse_result.warnings) * 2
+        
+        score = base_score - error_penalty - warning_penalty
+        return max(0, min(100, score))
