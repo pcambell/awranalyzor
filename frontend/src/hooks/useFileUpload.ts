@@ -99,11 +99,20 @@ export const useFileUpload = (config: UploadConfig = {}): UseFileUploadReturn =>
         clearInterval(progressInterval);
       }
 
-      if (!response.ok) {
-        throw new Error(`上传失败: ${response.status} ${response.statusText}`);
-      }
-
       const result = await response.json();
+
+      if (!response.ok) {
+        // 处理重复文件的特殊情况
+        if (response.status === 409) {
+          const duplicateError = {
+            message: result.message || result.error || '文件已存在',
+            type: 'duplicate_file',
+            existingFile: result.existing_file || null
+          };
+          throw duplicateError;
+        }
+        throw new Error(result.error || result.message || `上传失败: ${response.status}`);
+      }
       
       // 后端直接返回AWR报告对象，不是包装的ApiResponse格式
       // 检查是否包含必要的字段来判断是否成功
@@ -130,6 +139,27 @@ export const useFileUpload = (config: UploadConfig = {}): UseFileUploadReturn =>
       return uploadedFile;
 
     } catch (err: any) {
+      // 处理重复文件错误
+      if (err.type === 'duplicate_file') {
+        const duplicateMessage = `文件重复：${err.message}`;
+        setError(duplicateMessage);
+        
+        // 显示更友好的重复文件提示
+        message.warning({
+          content: duplicateMessage,
+          duration: 6,
+          key: 'duplicate-file-warning'
+        });
+        
+        // 返回特殊的错误对象，让调用方知道这是重复文件
+        return {
+          error: true,
+          type: 'duplicate_file',
+          message: duplicateMessage,
+          existingFile: err.existingFile
+        } as any;
+      }
+      
       const errorMessage = err.message || '上传失败';
       setError(errorMessage);
       message.error(errorMessage);

@@ -57,13 +57,13 @@ export const uploadFile = async (file: File, onProgress?: (progressEvent: any) =
 
 // 获取上传文件列表
 export const getUploadedFiles = async () => {
-  const response = await api.get('/files/');
+  const response = await api.get('/reports/');
   return response.data;
 };
 
 // 删除上传的文件
 export const deleteFile = async (fileId: string) => {
-  const response = await api.delete(`/files/${fileId}/`);
+  const response = await api.delete(`/reports/${fileId}/`);
   return response.data;
 };
 

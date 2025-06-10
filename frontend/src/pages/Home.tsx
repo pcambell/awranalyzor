@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Typography,
@@ -10,6 +10,7 @@ import {
   Alert,
   List,
   Timeline,
+  Button,
 } from 'antd';
 import {
   UploadOutlined,
@@ -18,20 +19,58 @@ import {
   FileTextOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-
-  // 示例统计数据（后续可以从API获取）
-  const stats = {
+  
+  // 统计数据状态
+  const [stats, setStats] = useState({
     totalFiles: 0,
     totalParses: 0,
     successRate: 0,
     avgParseTime: 0,
+  });
+  const [loading, setLoading] = useState(false);
+
+  // 获取统计数据
+  const fetchStatistics = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/dashboard/statistics/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStats({
+          totalFiles: data.total_files || 0,
+          totalParses: data.total_parses || 0,
+          successRate: data.success_rate || 0,
+          avgParseTime: data.avg_parse_time || 0,
+        });
+      } else {
+        console.error('获取统计数据失败:', response.status);
+        // 保持默认值0，不显示错误消息
+      }
+    } catch (error) {
+      console.error('获取统计数据失败:', error);
+      // 保持默认值0，不显示错误消息
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchStatistics();
+  }, []);
 
   // 快速操作
   const quickActions = [
@@ -95,17 +134,31 @@ const Home: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Oracle AWR 分析器</Title>
-        <Paragraph>
-          一个专业的Oracle AWR（Automatic Workload Repository）报告分析工具，
-          支持多版本Oracle数据库，提供详细的性能分析和可视化展示。
-        </Paragraph>
+        <Row justify="space-between" align="middle">
+          <Col>
+            <Title level={2}>Oracle AWR 分析器</Title>
+            <Paragraph>
+              一个专业的Oracle AWR（Automatic Workload Repository）报告分析工具，
+              支持多版本Oracle数据库，提供详细的性能分析和可视化展示。
+            </Paragraph>
+          </Col>
+          <Col>
+            <Button 
+              type="text" 
+              loading={loading}
+              onClick={fetchStatistics}
+              icon={<ReloadOutlined />}
+            >
+              刷新数据
+            </Button>
+          </Col>
+        </Row>
       </div>
 
       {/* 统计概览 */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card loading={loading}>
             <Statistic
               title="已上传文件"
               value={stats.totalFiles}
@@ -114,7 +167,7 @@ const Home: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card loading={loading}>
             <Statistic
               title="解析次数"
               value={stats.totalParses}
@@ -123,7 +176,7 @@ const Home: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card loading={loading}>
             <Statistic
               title="成功率"
               value={stats.successRate}
@@ -133,7 +186,7 @@ const Home: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card loading={loading}>
             <Statistic
               title="平均解析时间"
               value={stats.avgParseTime}

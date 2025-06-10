@@ -260,11 +260,11 @@ update_services() {
     
     # 执行迁移
     log_info "执行数据库迁移..."
-    docker-compose exec backend python manage.py migrate
+    docker-compose exec backend python3.11 manage.py migrate
     
     # 收集静态文件
     log_info "收集静态文件..."
-    docker-compose exec backend python manage.py collectstatic --noinput
+    docker-compose exec backend python3.11 manage.py collectstatic --noinput
     
     log_success "服务更新完成"
 }

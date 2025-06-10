@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   Upload, 
   Progress, 
@@ -12,7 +12,8 @@ import {
   Modal,
   Tooltip,
   Row,
-  Col
+  Col,
+  message
 } from 'antd';
 import { 
   InboxOutlined, 
@@ -21,7 +22,8 @@ import {
   ExclamationCircleOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  CloseCircleOutlined
+  CloseCircleOutlined,
+  ReloadOutlined
 } from '@ant-design/icons';
 import type { UploadProps, UploadFile } from 'antd';
 import { UploadedFile, AWRParseResult } from '../types';
@@ -54,6 +56,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [currentFile, setCurrentFile] = useState<UploadFile | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // 使用自定义Hook - DRY原则
   const {
@@ -69,6 +72,55 @@ const FileUpload: React.FC<FileUploadProps> = ({
     apiEndpoint: '/api'
   });
 
+  // 获取已上传文件列表
+  const fetchUploadedFiles = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/reports/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // 处理DRF分页格式
+        const files = data.results || data;
+        if (Array.isArray(files)) {
+          const formattedFiles: UploadedFile[] = files.map((file: any) => ({
+            id: file.id.toString(),
+            name: file.original_filename || file.name,
+            size: file.file_size || 0,
+            upload_time: file.created_at || new Date().toISOString(),
+            status: file.status === 'completed' ? 'completed' : 
+                    file.status === 'failed' ? 'failed' :
+                    file.status === 'processing' ? 'processing' : 'uploaded',
+            file_path: file.file_path,
+            error_message: file.error_message
+          }));
+          setUploadedFiles(formattedFiles);
+        }
+      } else if (response.status === 403 || response.status === 401) {
+        console.log('需要认证才能查看文件列表');
+        // 对于匿名用户，不显示错误，保持空列表
+        setUploadedFiles([]);
+      } else {
+        throw new Error('获取文件列表失败');
+      }
+    } catch (error: any) {
+      console.error('获取文件列表失败:', error);
+      // 不显示错误消息，允许继续上传
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // 组件挂载时获取文件列表
+  useEffect(() => {
+    fetchUploadedFiles();
+  }, [fetchUploadedFiles]);
+
   // 处理文件上传前的准备 - Clean Code原则
   const beforeUpload = useCallback((file: File): boolean => {
     setCurrentFile({
@@ -81,13 +133,48 @@ const FileUpload: React.FC<FileUploadProps> = ({
     return true;
   }, []);
 
+  // 处理重复文件情况 - 用户体验优化
+  const handleDuplicateFile = useCallback((file: File, duplicateInfo: any) => {
+    Modal.warning({
+      title: '文件重复',
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <div>
+          <p>{duplicateInfo.message}</p>
+          <p style={{ marginTop: 16, color: '#666' }}>
+            您可以：
+          </p>
+          <ul style={{ paddingLeft: 20 }}>
+            <li>取消上传，查看已存在的文件</li>
+            <li>如需重新上传，请先删除已存在的文件</li>
+          </ul>
+        </div>
+      ),
+      okText: '我知道了',
+      onOk: () => {
+        // 可以在这里添加导航到文件列表的逻辑
+        console.log('用户确认了重复文件提示');
+      }
+    });
+  }, []);
+
   // 处理文件上传 - SOLID原则：依赖注入
   const handleUpload = useCallback(async (file: File): Promise<void> => {
-    const uploadedFile = await uploadFile(file);
+    const uploadResult = await uploadFile(file);
     
-    if (uploadedFile) {
-      // 更新本地状态
-      setUploadedFiles(prev => [uploadedFile, ...prev]);
+    if (uploadResult) {
+      // 检查是否是重复文件错误
+      if ((uploadResult as any).error && (uploadResult as any).type === 'duplicate_file') {
+        // 处理重复文件情况
+        handleDuplicateFile(file, uploadResult as any);
+        setCurrentFile(null);
+        return;
+      }
+      
+      const uploadedFile = uploadResult as UploadedFile;
+      
+      // 重新获取文件列表以确保数据同步
+      await fetchUploadedFiles();
       setCurrentFile(null);
       
       // 回调通知父组件
@@ -104,7 +191,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       // 上传失败，清理当前文件状态
       setCurrentFile(null);
     }
-  }, [uploadFile, startParsing, onUploadSuccess, onParseStart]);
+  }, [uploadFile, startParsing, onUploadSuccess, onParseStart, handleDuplicateFile, fetchUploadedFiles]);
 
   // 删除文件 - 安全编码原则：确认操作
   const handleDelete = useCallback((fileId: string) => {
@@ -119,7 +206,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       okType: 'danger',
       onOk: async () => {
         try {
-          const response = await fetch(`/api/files/${fileId}/`, {
+          const response = await fetch(`/api/reports/${fileId}/`, {
             method: 'DELETE',
             headers: {
               'X-CSRFToken': getCsrfToken(),
@@ -127,7 +214,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
           });
 
           if (response.ok) {
-            setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+            // 重新获取文件列表以确保数据同步
+            await fetchUploadedFiles();
+            message.success('文件删除成功');
           } else {
             throw new Error('删除失败');
           }
@@ -139,7 +228,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
       },
     });
-  }, [uploadedFiles]);
+  }, [uploadedFiles, fetchUploadedFiles]);
 
   // 获取状态配置 - KISS原则：保持简单
   const getStatusConfig = (status: UploadedFile['status']) => {
@@ -232,17 +321,27 @@ const FileUpload: React.FC<FileUploadProps> = ({
       </Card>
 
       {/* 上传历史 */}
-      {uploadedFiles.length > 0 && (
-        <Card title="最近上传的文件" 
-              extra={
+      <Card title="文件管理" 
+            extra={
+              <Space>
+                <Button 
+                  type="text" 
+                  loading={loading}
+                  onClick={fetchUploadedFiles}
+                  icon={<ReloadOutlined />}
+                >
+                  刷新
+                </Button>
                 <Text type="secondary">
                   共 {uploadedFiles.length} 个文件
                 </Text>
-              }>
-          <List
-            itemLayout="horizontal"
-            dataSource={uploadedFiles}
-            renderItem={(file) => {
+              </Space>
+            }>
+                      {uploadedFiles.length > 0 ? (
+              <List
+                itemLayout="horizontal"
+                dataSource={uploadedFiles}
+                renderItem={(file) => {
               const statusConfig = getStatusConfig(file.status);
               return (
                 <List.Item
@@ -312,8 +411,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
               );
             }}
           />
-        </Card>
-      )}
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📁</div>
+            <div>暂无上传文件</div>
+            <div style={{ fontSize: '12px', marginTop: '8px' }}>
+              上传AWR文件后将在此显示
+            </div>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

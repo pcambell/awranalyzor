@@ -16,7 +16,8 @@ from .views import (
     AWRReportViewSet,
     AWRFileValidationView,
     AWRParsingProgressView,
-    AWRParseResultView
+    AWRParseResultView,
+    dashboard_statistics
 )
 
 app_name = 'awr_upload'
@@ -32,4 +33,7 @@ urlpatterns = [
     path('validate/', AWRFileValidationView.as_view(), name='validate'),  # 对应 /api/validate/
     path('progress/<int:report_id>/', AWRParsingProgressView.as_view(), name='progress'),  # 对应 /api/progress/{id}/
     path('parse-results/<int:report_id>/', AWRParseResultView.as_view(), name='parse_results'),  # 对应 /api/parse-results/{id}/
+    
+    # 仪表板统计
+    path('dashboard/statistics/', dashboard_statistics, name='dashboard-statistics'),
 ] 
