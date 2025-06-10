@@ -279,9 +279,14 @@ class AWRReportViewSet(viewsets.ModelViewSet):
         """
         try:
             # 删除物理文件
-            if instance.file_path and os.path.exists(instance.file_path):
-                os.remove(instance.file_path)
-                logger.info(f"已删除文件: {instance.file_path}")
+            if instance.file_path:
+                try:
+                    # 使用Django FileField的delete方法安全删除文件
+                    instance.file_path.delete(save=False)
+                    logger.info(f"已删除文件: {instance.file_path.name}")
+                except Exception as file_error:
+                    logger.warning(f"删除物理文件失败: {file_error}")
+                    # 继续删除数据库记录，即使文件删除失败
             
             # 删除数据库记录（级联删除相关数据）
             report_id = instance.id

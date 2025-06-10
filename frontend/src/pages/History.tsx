@@ -59,6 +59,7 @@ const History: React.FC = () => {
             size: file.file_size || 0,
             upload_time: file.created_at || new Date().toISOString(),
             status: file.status === 'completed' ? 'completed' : 
+                    file.status === 'parsed' ? 'completed' :
                     file.status === 'failed' ? 'failed' :
                     file.status === 'processing' ? 'processing' : 'uploaded',
             file_path: file.file_path,
@@ -87,14 +88,17 @@ const History: React.FC = () => {
 
   // 删除文件
   const handleDelete = (fileId: string, fileName: string) => {
-    confirm({
-      title: '确认删除',
-      content: `确定要删除文件 "${fileName}" 吗？此操作不可恢复。`,
-      okText: '删除',
-      cancelText: '取消',
-      okType: 'danger',
-      onOk: async () => {
+    console.log('handleDelete called with:', fileId, fileName); // 调试日志
+    
+    // 使用浏览器原生确认对话框，确保能够显示
+    const confirmed = window.confirm(`确定要删除文件 "${fileName}" 吗？此操作不可恢复。`);
+    
+    if (confirmed) {
+      console.log('User confirmed deletion'); // 调试日志
+      
+      const performDelete = async () => {
         try {
+          console.log('Sending DELETE request to:', `/api/reports/${fileId}/`); // 调试日志
           const response = await fetch(`/api/reports/${fileId}/`, {
             method: 'DELETE',
             headers: {
@@ -102,39 +106,42 @@ const History: React.FC = () => {
             },
           });
 
+          console.log('DELETE response:', response.status, response.statusText); // 调试日志
           if (response.ok) {
             message.success('文件删除成功');
             fetchHistory(); // 重新获取列表
           } else {
+            const errorData = await response.text();
+            console.error('DELETE failed:', errorData); // 调试日志
             throw new Error('删除失败');
           }
         } catch (error: any) {
+          console.error('Delete error:', error); // 调试日志
           message.error('删除失败: ' + error.message);
         }
-      },
-    });
+      };
+      
+      performDelete();
+    } else {
+      console.log('User cancelled deletion'); // 调试日志
+    }
   };
 
   // 查看详情
   const handleViewDetails = (file: UploadedFile) => {
-    Modal.info({
-      title: '文件详情',
-      width: 600,
-      content: (
-        <div>
-          <p><strong>文件名:</strong> {file.name}</p>
-          <p><strong>文件大小:</strong> {formatFileSize(file.size)}</p>
-          <p><strong>上传时间:</strong> {new Date(file.upload_time).toLocaleString()}</p>
-          <p><strong>状态:</strong> {getStatusText(file.status)}</p>
-          {file.error_message && (
-            <p><strong>错误信息:</strong> <span style={{color: 'red'}}>{file.error_message}</span></p>
-          )}
-          {file.file_path && (
-            <p><strong>文件路径:</strong> <code>{file.file_path}</code></p>
-          )}
-        </div>
-      ),
-    });
+    console.log('handleViewDetails called with:', file); // 调试日志
+    
+    // 先使用简单的alert方式测试，然后再优化为Modal
+    const details = [
+      `文件名: ${file.name}`,
+      `文件大小: ${formatFileSize(file.size)}`,
+      `上传时间: ${new Date(file.upload_time).toLocaleString()}`,
+      `状态: ${getStatusText(file.status)}`,
+      file.error_message ? `错误信息: ${file.error_message}` : '',
+      file.file_path ? `文件路径: ${file.file_path}` : ''
+    ].filter(Boolean).join('\n');
+    
+    alert('文件详情:\n\n' + details);
   };
 
   // 查看解析结果
@@ -221,7 +228,11 @@ const History: React.FC = () => {
             <Button 
               type="text" 
               icon={<InfoCircleOutlined />}
-              onClick={() => handleViewDetails(record)}
+              onClick={() => {
+                console.log('Info button clicked for record:', record);
+                handleViewDetails(record);
+              }}
+              style={{ color: '#1890ff' }}
             />
           </Tooltip>
           {record.status === 'completed' && (
@@ -238,7 +249,11 @@ const History: React.FC = () => {
               type="text" 
               danger 
               icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record.id, record.name)}
+              onClick={() => {
+                console.log('Delete button clicked for record:', record);
+                handleDelete(record.id, record.name);
+              }}
+              style={{ color: '#ff4d4f' }}
             />
           </Tooltip>
         </Space>
@@ -310,7 +325,17 @@ const History: React.FC = () => {
       </Row>
 
       {/* 文件列表 */}
-      <Card title="文件列表">
+      <Card title="文件列表" extra={
+        <Button 
+          type="link" 
+          onClick={() => {
+            console.log('Test button clicked!');
+            message.info('测试按钮点击正常');
+          }}
+        >
+          测试按钮
+        </Button>
+      }>
         <Table
           columns={columns}
           dataSource={files}
