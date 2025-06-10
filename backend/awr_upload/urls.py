@@ -17,7 +17,8 @@ from .views import (
     AWRFileValidationView,
     AWRParsingProgressView,
     AWRParseResultView,
-    dashboard_statistics
+    dashboard_statistics,
+    health_check
 )
 
 app_name = 'awr_upload'
@@ -36,4 +37,7 @@ urlpatterns = [
     
     # 仪表板统计
     path('dashboard/statistics/', dashboard_statistics, name='dashboard-statistics'),
+    
+    # 健康检查
+    path('health/', health_check, name='health-check'),
 ] 

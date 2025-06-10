@@ -22,6 +22,11 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer, ValidationError, Serializer, CharField, IntegerField, FloatField, DateTimeField, ListField, DictField, SerializerMethodField
 from rest_framework.views import APIView
+from django.views.decorators.http import require_http_methods
+from django.db import connection
+import redis
+from django.conf import settings
+from django.utils import timezone
 
 from .models import AWRReport
 from .services import AWRUploadService, AWRParsingService, AWRFileValidationError
@@ -776,3 +781,60 @@ class AWRParseResultView(APIView):
         
         score = base_score - error_penalty - warning_penalty
         return max(0, min(100, score))
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def health_check(request):
+    """
+    生产环境健康检查端点
+    检查数据库、Redis连接和基础服务状态
+    """
+    try:
+        health_status = {
+            'status': 'healthy',
+            'timestamp': timezone.now().isoformat(),
+            'services': {}
+        }
+        
+        # 检查数据库连接
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+            health_status['services']['database'] = 'healthy'
+        except Exception as e:
+            health_status['services']['database'] = f'unhealthy: {str(e)}'
+            health_status['status'] = 'unhealthy'
+        
+        # 检查Redis连接
+        try:
+            if hasattr(settings, 'REDIS_URL'):
+                import redis
+                r = redis.Redis.from_url(settings.REDIS_URL)
+                r.ping()
+                health_status['services']['redis'] = 'healthy'
+            else:
+                health_status['services']['redis'] = 'not configured'
+        except Exception as e:
+            health_status['services']['redis'] = f'unhealthy: {str(e)}'
+            health_status['status'] = 'degraded'
+        
+        # 检查基础功能
+        try:
+            # 检查是否能查询AWR报告
+            report_count = AWRReport.objects.count()
+            health_status['services']['awr_reports'] = f'healthy ({report_count} reports)'
+        except Exception as e:
+            health_status['services']['awr_reports'] = f'unhealthy: {str(e)}'
+            health_status['status'] = 'unhealthy'
+        
+        # 返回状态码
+        status_code = 200 if health_status['status'] == 'healthy' else 503
+        return JsonResponse(health_status, status=status_code)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': timezone.now().isoformat()
+        }, status=503)
