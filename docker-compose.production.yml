@@ -1,0 +1,297 @@
+# AWR分析系统 - 生产环境Docker Compose配置
+# {{CHENGQI: P3-SE-017 生产安全配置 - 安全强化配置 - 2025-06-10T20:55:00 +08:00}}
+
+version: '3.8'
+
+services:
+  # PostgreSQL数据库 - 生产安全配置
+  db:
+    image: postgres:15-alpine
+    container_name: awranalyzor_db_prod
+    restart: unless-stopped
+    user: "999:999"  # 非root用户
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-awranalyzor}
+      POSTGRES_USER: ${POSTGRES_USER:-awruser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--auth-local=trust --auth-host=scram-sha-256"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:Z
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-awruser} -d ${POSTGRES_DB:-awranalyzor}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+
+  # Redis缓存 - 生产安全配置
+  redis:
+    image: redis:7-alpine
+    container_name: awranalyzor_redis_prod
+    restart: unless-stopped
+    user: "999:999"  # 非root用户
+    command: >
+      redis-server 
+      --appendonly yes 
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - redis_data:/data:Z
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # Django后端 - 生产安全配置
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_backend_prod
+    restart: unless-stopped
+    user: "1001:1001"  # 非root用户
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-awruser}:${DB_PASSWORD}@db:5432/${POSTGRES_DB:-awranalyzor}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - SECURE_SSL_REDIRECT=True
+      - SESSION_COOKIE_SECURE=True
+      - CSRF_COOKIE_SECURE=True
+    volumes:
+      - media_files:/app/media:Z
+      - static_files:/app/staticfiles:Z
+      - log_files:/app/logs:Z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache
+
+  # Celery Worker - 生产安全配置
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_celery_worker_prod
+    restart: unless-stopped
+    user: "1001:1001"
+    command: celery -A awranalyzor worker -l info -Q awr_parsing,performance_analysis,report_generation,default --concurrency=2 --max-tasks-per-child=100
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-awruser}:${DB_PASSWORD}@db:5432/${POSTGRES_DB:-awranalyzor}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+    volumes:
+      - media_files:/app/media:Z
+      - log_files:/app/logs:Z
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "celery", "-A", "awranalyzor", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # Celery Beat - 生产安全配置
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_celery_beat_prod
+    restart: unless-stopped
+    user: "1001:1001"
+    command: celery -A awranalyzor beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-awruser}:${DB_PASSWORD}@db:5432/${POSTGRES_DB:-awranalyzor}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+    volumes:
+      - log_files:/app/logs:Z
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'celery.*beat' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # Nginx反向代理 - 生产安全配置
+  nginx:
+    image: nginx:1.24-alpine
+    container_name: awranalyzor_nginx_prod
+    restart: unless-stopped
+    user: "101:101"  # nginx用户
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
+      - ./nginx/security.conf:/etc/nginx/conf.d/security.conf:ro
+      - ./ssl_certs:/etc/nginx/ssl:ro
+      - static_files:/usr/share/nginx/html/static:ro
+      - media_files:/usr/share/nginx/html/media:ro
+    depends_on:
+      - backend
+    networks:
+      - awranalyzor_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+
+  # 监控 - Flower (可选)
+  flower:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: awranalyzor_flower_prod
+    restart: unless-stopped
+    user: "1001:1001"
+    command: celery -A awranalyzor flower --port=5555 --basic_auth=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-flower123}
+    environment:
+      - DJANGO_SETTINGS_MODULE=awranalyzor.settings.production
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+    ports:
+      - "127.0.0.1:5555:5555"  # 只监听本地
+    depends_on:
+      - redis
+      - celery_worker
+    networks:
+      - awranalyzor_network
+    profiles:
+      - monitoring
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/postgres
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/redis
+  media_files:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/media
+  static_files:
+    driver: local
+  log_files:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs
+
+networks:
+  awranalyzor_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "false"  # 禁用容器间直接通信 
